@@ -6,409 +6,157 @@
   <title>宝宝成长记录</title>
   <style>
     :root {
-      --bg: #f5f6fa;
-      --card: #ffffff;
-      --primary: #6c5ce7;
-      --primary-light: rgba(108,92,231,0.1);
-      --poop: #e17055;
-      --poop-bg: rgba(225,112,85,0.12);
-      --pee: #74b9ff;
-      --pee-bg: rgba(116,185,255,0.12);
-      --milk: #fdcb6e;
-      --milk-bg: rgba(253,203,110,0.2);
-      --breast: #fd79a8;
-      --breast-bg: rgba(253,121,168,0.12);
-      --text: #2d3436;
-      --text-light: #636e72;
-      --border: #dfe6e9;
-      --shadow: 0 2px 12px rgba(0,0,0,0.08);
-      --radius: 20px;
-      --radius-sm: 14px;
+      --bg: #f5f6fa; --card: #ffffff; --primary: #6c5ce7; --primary-light: rgba(108,92,231,0.1);
+      --poop: #e17055; --poop-bg: rgba(225,112,85,0.12);
+      --pee: #74b9ff; --pee-bg: rgba(116,185,255,0.12);
+      --milk: #fdcb6e; --milk-bg: rgba(253,203,110,0.2);
+      --breast: #fd79a8; --breast-bg: rgba(253,121,168,0.12);
+      --text: #2d3436; --text-light: #636e72; --border: #dfe6e9;
+      --shadow: 0 2px 12px rgba(0,0,0,0.08); --radius: 20px; --radius-sm: 14px;
     }
-
     * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      padding-bottom: 70px;
-    }
-
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding-bottom: 70px; }
     .container { max-width: 480px; margin: 0 auto; padding: 0 16px; }
-
-    /* Header */
-    header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 20px 0 16px;
-      position: sticky;
-      top: 0;
-      background: var(--bg);
-      z-index: 10;
-    }
-
-    header h1 {
-      font-size: 22px;
-      font-weight: 700;
-      color: var(--primary);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
+    header { display: flex; align-items: center; justify-content: space-between; padding: 20px 0 16px; position: sticky; top: 0; background: var(--bg); z-index: 10; }
+    header h1 { font-size: 22px; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 8px; }
     header h1 span { font-size: 26px; }
-
     .header-actions { display: flex; gap: 8px; }
-
-    .icon-btn {
-      width: 40px;
-      height: 40px;
-      border: none;
-      border-radius: 50%;
-      background: var(--card);
-      box-shadow: var(--shadow);
-      font-size: 18px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: transform 0.2s;
-    }
-
+    .icon-btn { width: 40px; height: 40px; border: none; border-radius: 50%; background: var(--card); box-shadow: var(--shadow); font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; }
     .icon-btn:active { transform: scale(0.92); }
-
-    /* Tab Nav */
-    .tab-nav {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 16px;
-    }
-
-    .tab-btn {
-      flex: 1;
-      padding: 12px;
-      border: none;
-      border-radius: var(--radius-sm);
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      background: var(--card);
-      color: var(--text-light);
-      box-shadow: var(--shadow);
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-    }
-
-    .tab-btn.active {
-      background: var(--primary);
-      color: white;
-    }
-
+    .tab-nav { display: flex; gap: 8px; margin-bottom: 16px; }
+    .tab-btn { flex: 1; padding: 12px; border: none; border-radius: var(--radius-sm); font-size: 14px; font-weight: 600; cursor: pointer; background: var(--card); color: var(--text-light); box-shadow: var(--shadow); transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px; }
+    .tab-btn.active { background: var(--primary); color: white; }
     .tab-btn .icon { font-size: 18px; }
-
     .tab-content { display: none; }
     .tab-content.active { display: block; }
-
-    /* Card */
-    .card {
-      background: var(--card);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 20px;
-      margin-bottom: 16px;
-    }
-
-    .card-title {
-      font-size: 13px;
-      color: var(--text-light);
-      margin-bottom: 14px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    /* Record Buttons */
-    .record-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
-
-    .record-btn {
-      height: 90px;
-      border: none;
-      border-radius: var(--radius-sm);
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      transition: all 0.2s;
-      color: white;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .record-btn::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 50%);
-    }
-
+    .card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px; margin-bottom: 16px; }
+    .card-title { font-size: 13px; color: var(--text-light); margin-bottom: 14px; display: flex; align-items: center; gap: 6px; }
+    .record-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .record-btn { height: 90px; border: none; border-radius: var(--radius-sm); font-size: 15px; font-weight: 600; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s; color: white; position: relative; overflow: hidden; }
+    .record-btn::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 50%); }
     .record-btn:active { transform: scale(0.96); }
     .record-btn .icon { font-size: 36px; position: relative; z-index: 1; }
     .record-btn .label { position: relative; z-index: 1; }
-
     .record-btn.poop { background: linear-gradient(145deg, var(--poop), #d63031); }
     .record-btn.pee { background: linear-gradient(145deg, var(--pee), #0984e3); }
     .record-btn.milk { background: linear-gradient(145deg, var(--milk), #f9a825); color: #5d4e1a; }
     .record-btn.breast { background: linear-gradient(145deg, var(--breast), #e84393); }
-
-    /* Stats */
     .stats-row { display: flex; gap: 10px; }
-
-    .stat-item {
-      flex: 1;
-      text-align: center;
-      padding: 14px 8px;
-      border-radius: var(--radius-sm);
-      background: var(--bg);
-    }
-
+    .stat-item { flex: 1; text-align: center; padding: 14px 8px; border-radius: var(--radius-sm); background: var(--bg); cursor: pointer; }
     .stat-item .icon { font-size: 22px; margin-bottom: 4px; }
     .stat-item .num { font-size: 28px; font-weight: 700; }
     .stat-item .label { font-size: 11px; color: var(--text-light); margin-top: 2px; }
-
     .stat-item.poop .num { color: var(--poop); }
     .stat-item.pee .num { color: var(--pee); }
     .stat-item.milk .num { color: #d4a017; }
     .stat-item.breast .num { color: var(--breast); }
-
-    /* History Filter */
-    .filter-row {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 16px;
-    }
-
-    .filter-btn {
-      padding: 8px 14px;
-      border: none;
-      border-radius: 20px;
-      font-size: 13px;
-      cursor: pointer;
-      background: var(--card);
-      color: var(--text-light);
-      box-shadow: var(--shadow);
-      transition: all 0.2s;
-    }
-
-    .filter-btn.active {
-      background: var(--primary);
-      color: white;
-    }
-
-    /* History List */
+    .filter-row { display: flex; gap: 8px; margin-bottom: 16px; }
+    .filter-btn { padding: 8px 14px; border: none; border-radius: 20px; font-size: 13px; cursor: pointer; background: var(--card); color: var(--text-light); box-shadow: var(--shadow); transition: all 0.2s; }
+    .filter-btn.active { background: var(--primary); color: white; }
     .history-list { display: flex; flex-direction: column; }
-
-    .history-item {
-      display: flex;
-      align-items: center;
-      padding: 14px 0;
-      border-bottom: 1px solid var(--border);
-    }
-
+    .history-item { display: flex; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--border); }
     .history-item:last-child { border-bottom: none; }
-
-    .history-item .time {
-      font-size: 12px;
-      color: var(--text-light);
-      width: 70px;
-      flex-shrink: 0;
-    }
-
-    .history-item .type-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 22px;
-      margin-right: 12px;
-      flex-shrink: 0;
-    }
-
+    .history-item .time { font-size: 12px; color: var(--text-light); width: 70px; flex-shrink: 0; }
+    .history-item .type-icon { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; margin-right: 12px; flex-shrink: 0; }
     .history-item.poop .type-icon { background: var(--poop-bg); }
     .history-item.pee .type-icon { background: var(--pee-bg); }
     .history-item.milk .type-icon { background: var(--milk-bg); }
     .history-item.breast .type-icon { background: var(--breast-bg); }
-
     .history-item .info { flex: 1; }
     .history-item .type-name { font-weight: 600; font-size: 14px; }
     .history-item .type-name.poop { color: var(--poop); }
     .history-item .type-name.pee { color: #0984e3; }
     .history-item .type-name.milk { color: #d4a017; }
     .history-item .type-name.breast { color: var(--breast); }
-
-    .history-item .relative {
-      font-size: 11px;
-      color: var(--text-light);
-    }
-
-    .history-empty {
-      text-align: center;
-      padding: 30px;
-      color: var(--text-light);
-      font-size: 14px;
-    }
-
-    /* Week Chart */
-    .week-chart {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-      height: 100px;
-      padding: 10px 0;
-    }
-
-    .chart-bar {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .chart-bar .bar {
-      width: 28px;
-      border-radius: 6px 6px 0 0;
-      min-height: 4px;
-      transition: height 0.3s;
-    }
-
-    .chart-bar .bar.poop { background: var(--poop); }
-    .chart-bar .bar.pee { background: var(--pee); }
-    .chart-bar .bar.milk { background: var(--milk); }
-
-    .chart-bar .day {
-      font-size: 11px;
-      color: var(--text-light);
-    }
-
-    /* Summary Stats */
-    .summary-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-
-    .summary-item {
-      padding: 12px;
-      border-radius: var(--radius-sm);
-      background: var(--bg);
-      text-align: center;
-    }
-
-    .summary-item .val { font-size: 24px; font-weight: 700; color: var(--primary); }
-    .summary-item .lbl { font-size: 11px; color: var(--text-light); margin-top: 2px; }
-
-    /* Toast */
-    .toast {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: rgba(0,0,0,0.75);
-      color: white;
-      padding: 14px 28px;
-      border-radius: 12px;
-      font-size: 15px;
-      z-index: 1000;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s;
-    }
-
+    .history-item .relative { font-size: 11px; color: var(--text-light); }
+    .history-empty { text-align: center; padding: 30px; color: var(--text-light); font-size: 14px; }
+    #chartContainer { height: 150px; position: relative; }
+    #chartSummary { margin-top: 8px; font-size: 12px; color: var(--text-light); text-align: center; }
+    .toast { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.75); color: white; padding: 14px 28px; border-radius: 12px; font-size: 15px; z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
     .toast.show { opacity: 1; }
-
-    /* Modal */
-    .modal-overlay {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.5);
-      z-index: 100;
-      display: flex;
-      align-items: flex-end;
-      justify-content: center;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s;
-    }
-
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 100; display: flex; align-items: flex-end; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
     .modal-overlay.show { opacity: 1; pointer-events: auto; }
-
-    .modal {
-      background: var(--card);
-      border-radius: 24px 24px 0 0;
-      padding: 24px;
-      width: 100%;
-      max-width: 480px;
-      transform: translateY(100%);
-      transition: transform 0.3s;
-    }
-
+    .modal { background: var(--card); border-radius: 24px 24px 0 0; padding: 24px; width: 100%; max-width: 480px; transform: translateY(100%); transition: transform 0.3s; max-height: 90vh; overflow-y: auto; }
     .modal-overlay.show .modal { transform: translateY(0); }
-
     .modal-title { font-size: 17px; font-weight: 700; margin-bottom: 16px; text-align: center; }
-
-    .modal-btn {
-      width: 100%;
-      padding: 14px;
-      border: none;
-      border-radius: var(--radius-sm);
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-      margin-bottom: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-
+    .modal-btn { width: 100%; padding: 14px; border: none; border-radius: var(--radius-sm); font-size: 15px; font-weight: 600; cursor: pointer; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; }
     .modal-btn.export { background: var(--primary); color: white; }
     .modal-btn.import { background: var(--primary-light); color: var(--primary); }
     .modal-btn.cancel { background: var(--bg); color: var(--text-light); margin-top: 6px; }
     .modal-btn:active { transform: scale(0.98); }
-
-    #importFile { display: none; }
-
+    .form-group { margin-bottom: 14px; }
+    .form-group label { font-size: 13px; color: var(--text-light); display: block; margin-bottom: 6px; }
+    .form-group input { width: 100%; padding: 12px; border: 2px solid var(--border); border-radius: 12px; font-size: 14px; outline: none; background: white; }
+    .form-group input:focus { border-color: var(--primary); }
     .version { text-align: center; font-size: 11px; color: var(--text-light); padding: 10px 0; }
+    .loading { text-align: center; padding: 40px; color: var(--text-light); }
+    .gender-row { display: flex; gap: 10px; }
+    .gender-btn { flex: 1; padding: 12px; border: 2px solid var(--border); border-radius: 12px; background: white; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s; }
+    .gender-btn.selected { border-color: var(--primary); background: var(--primary-light); color: var(--primary); }
+
+    /* ===== 登录/注册页 ===== */
+    #authScreen { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+    .auth-logo { font-size: 64px; margin-bottom: 16px; }
+    .auth-title { font-size: 26px; font-weight: 700; color: var(--primary); margin-bottom: 4px; }
+    .auth-sub { font-size: 14px; color: var(--text-light); margin-bottom: 32px; }
+    .auth-tabs { display: flex; background: var(--bg); border-radius: 14px; padding: 4px; margin-bottom: 24px; width: 100%; max-width: 300px; }
+    .auth-tab { flex: 1; padding: 10px; text-align: center; border: none; background: transparent; font-size: 14px; font-weight: 600; color: var(--text-light); cursor: pointer; border-radius: 10px; transition: all 0.2s; }
+    .auth-tab.active { background: var(--card); color: var(--primary); box-shadow: var(--shadow); }
+    .auth-form { width: 100%; max-width: 300px; }
+    .auth-error { color: #e74c3c; font-size: 13px; text-align: center; margin-bottom: 10px; min-height: 18px; }
+    .app-screen { display: none; }
+    .app-screen.active { display: block; }
+    #logoutBtn { background: none; border: none; font-size: 13px; color: var(--text-light); cursor: pointer; padding: 6px 10px; border-radius: 8px; }
   </style>
 </head>
 <body>
-  <div class="container">
+  <!-- ===== 登录/注册页 ===== -->
+  <div id="authScreen">
+    <div class="auth-logo">👶</div>
+    <div class="auth-title">宝宝成长记录</div>
+    <div class="auth-sub">记录每一天的成长</div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" data-tab="login" onclick="switchAuthTab('login')">登录</button>
+      <button class="auth-tab" data-tab="register" onclick="switchAuthTab('register')">注册</button>
+    </div>
+    <div class="auth-form" id="loginForm">
+      <div class="auth-error" id="loginError"></div>
+      <div class="form-group">
+        <input type="text" id="loginName" placeholder="输入宝宝名字" maxlength="20">
+      </div>
+      <button class="modal-btn export" onclick="doLogin()">登录</button>
+    </div>
+    <div class="auth-form" id="registerForm" style="display:none;">
+      <div class="auth-error" id="registerError"></div>
+      <div class="form-group">
+        <input type="text" id="regName" placeholder="输入宝宝名字（作为账号）" maxlength="20">
+      </div>
+      <div class="form-group">
+        <input type="date" id="regBirthday">
+      </div>
+      <div class="form-group">
+        <div class="gender-row">
+          <button type="button" class="gender-btn selected" id="regBoy" onclick="selectRegGender('boy')">👦 男宝</button>
+          <button type="button" class="gender-btn" id="regGirl" onclick="selectRegGender('girl')">👧 女宝</button>
+        </div>
+      </div>
+      <button class="modal-btn export" onclick="doRegister()">注册</button>
+    </div>
+  </div>
+
+  <!-- ===== App主界面 ===== -->
+  <div class="app-screen container" id="appScreen">
     <header>
       <div>
         <h1><span id="headerBabyIcon">👶</span> <span id="headerBabyName">宝宝</span></h1>
         <div id="headerBabyAge" style="font-size:12px;color:var(--text-light);"></div>
       </div>
       <div class="header-actions">
+        <button id="logoutBtn" onclick="doLogout()">退出</button>
         <button class="icon-btn" onclick="showMenu()" title="更多">⚙️</button>
       </div>
     </header>
 
-    <!-- Tab 导航 -->
     <div class="tab-nav">
       <button class="tab-btn active" data-tab="recordTab" onclick="switchTab('recordTab')">
         <span class="icon">✏️</span> 记录
@@ -418,227 +166,122 @@
       </button>
     </div>
 
-    <!-- 记录 Tab -->
     <div class="tab-content active" id="recordTab">
-      <!-- 快速记录 -->
       <div class="card">
         <div class="card-title">✨ 点击记录</div>
-        <div class="record-grid" style="grid-template-columns: 1fr 1fr;">
-          <button class="record-btn poop" onclick="record('大便')">
-            <span class="icon">💩</span>
-            <span class="label">大便</span>
-          </button>
-          <button class="record-btn pee" onclick="record('小便')">
-            <span class="icon">💧</span>
-            <span class="label">小便</span>
-          </button>
-          <button class="record-btn milk" onclick="record('喂奶')">
-            <span class="icon">🍼</span>
-            <span class="label">瓶喂</span>
-          </button>
-          <button class="record-btn breast" onclick="record('亲喂')">
-            <span class="icon">🤱</span>
-            <span class="label">亲喂</span>
-          </button>
+        <div class="record-grid">
+          <button class="record-btn poop" onclick="record('大便')"><span class="icon">💩</span><span class="label">大便</span></button>
+          <button class="record-btn pee" onclick="record('小便')"><span class="icon">💧</span><span class="label">小便</span></button>
+          <button class="record-btn milk" onclick="record('喂奶')"><span class="icon">🍼</span><span class="label">瓶喂</span></button>
+          <button class="record-btn breast" onclick="record('亲喂')"><span class="icon">🤱</span><span class="label">亲喂</span></button>
         </div>
-        <button class="record-btn" onclick="record('体重')" style="width:100%;margin-top:12px;height:56px;background:linear-gradient(145deg,#a29bfe,#6c5ce7);color:white;border:none;border-radius:14px;font-size:15px;font-weight:600;cursor:pointer;display:flex;flex-direction:row;align-items:center;justify-content:center;gap:8px;">
-          <span style="font-size:24px;">⚖️</span>
-          <span>体重</span>
+        <button onclick="record('体重')" style="width:100%;margin-top:12px;height:56px;background:linear-gradient(145deg,#a29bfe,#6c5ce7);color:white;border:none;border-radius:14px;font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+          <span style="font-size:24px;">⚖️</span><span>体重</span>
         </button>
       </div>
 
-      <!-- 今日统计 -->
       <div class="card">
         <div class="card-title">📊 今日统计 <span style="font-weight:normal;font-size:12px;color:var(--text-light)">（点击查看详情）</span></div>
         <div class="stats-row">
-          <div class="stat-item poop" onclick="showTodayDetail('大便')" style="cursor:pointer;">
-            <div class="icon">💩</div>
-            <div class="num" id="todayPoop">0</div>
-            <div class="label">大便</div>
-          </div>
-          <div class="stat-item pee" onclick="showTodayDetail('小便')" style="cursor:pointer;">
-            <div class="icon">💧</div>
-            <div class="num" id="todayPee">0</div>
-            <div class="label">小便</div>
-          </div>
-          <div class="stat-item milk" onclick="showTodayDetail('喝奶')" style="cursor:pointer;">
-            <div class="icon">🍼</div>
-            <div class="num" id="todayMilkAmount">0</div>
-            <div class="label">奶量 ml</div>
-          </div>
-          <div class="stat-item" onclick="showTodayDetail('喂奶')" style="cursor:pointer;">
-            <div class="icon">🍼🤱</div>
-            <div class="num" id="todayFeedCount">0</div>
-            <div class="label">喂奶 次</div>
-          </div>
+          <div class="stat-item poop" onclick="showTodayDetail('大便')"><div class="icon">💩</div><div class="num" id="todayPoop">0</div><div class="label">大便</div></div>
+          <div class="stat-item pee" onclick="showTodayDetail('小便')"><div class="icon">💧</div><div class="num" id="todayPee">0</div><div class="label">小便</div></div>
+          <div class="stat-item milk" onclick="showTodayDetail('喝奶')"><div class="icon">🍼</div><div class="num" id="todayMilkAmount">0</div><div class="label">奶量 ml</div></div>
+          <div class="stat-item" onclick="showTodayDetail('喂奶')"><div class="icon">🍼🤱</div><div class="num" id="todayFeedCount">0</div><div class="label">喂奶 次</div></div>
         </div>
       </div>
     </div>
 
-    <!-- 历史 Tab -->
     <div class="tab-content" id="historyTab">
-      <!-- 筛选 -->
       <div class="filter-row">
         <button class="filter-btn active" data-filter="week" onclick="setHistoryFilter('week')">本周</button>
         <button class="filter-btn" data-filter="month" onclick="setHistoryFilter('month')">本月</button>
         <button class="filter-btn" data-filter="all" onclick="setHistoryFilter('all')">全部</button>
       </div>
 
-      <!-- 趋势图 -->
-      <div class="card" id="chartCard">
+      <div class="card">
         <div class="card-title">📈 趋势</div>
         <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
           <button class="filter-btn active" data-chart="milk" onclick="setChartFilter('milk')" id="chartBtnMilk">喝奶量</button>
           <button class="filter-btn" data-chart="maxMilk" onclick="setChartFilter('maxMilk')" id="chartBtnMaxMilk">最大单次</button>
           <button class="filter-btn" data-chart="weight" onclick="setChartFilter('weight')" id="chartBtnWeight">体重</button>
         </div>
-        <div id="chartContainer" style="height:150px;position:relative;">
-          <canvas id="trendChart" style="width:100%;height:100%;"></canvas>
-        </div>
-        <div id="chartSummary" style="margin-top:8px;font-size:12px;color:var(--text-light);text-align:center;"></div>
+        <div id="chartContainer"><canvas id="trendChart"></canvas></div>
+        <div id="chartSummary"></div>
       </div>
 
-      <!-- 历史列表 -->
       <div class="card">
         <div class="card-title">📋 记录列表</div>
-        <div class="history-list" id="historyList">
-          <div class="history-empty">暂无记录</div>
-        </div>
+        <div class="history-list" id="historyList"><div class="loading">加载中...</div></div>
       </div>
     </div>
 
-    <div class="version">v0.9.4</div>
+    <div class="version">v1.0</div>
   </div>
 
-  <!-- 设置菜单 -->
-  <div class="modal-overlay" id="menuModal" onclick="hideMenu(event)">
-    <div class="modal" onclick="event.stopPropagation()">
-      <div class="modal-title">更多操作</div>
-      <button class="modal-btn export" onclick="hideMenu();showBabyInfoModal();">👶 宝宝信息</button>
-      <button class="modal-btn export" onclick="exportData()">📤 导出备份</button>
-      <button class="modal-btn import" onclick="document.getElementById('importFile').click()">📥 导入备份</button>
-      <input type="file" id="importFile" accept=".json" onchange="importData(this.files[0])">
-      <button class="modal-btn cancel" onclick="hideMenu();showClearConfirmModal();" style="background:#ffeef0;color:#e74c3c;margin-top:6px;">🗑️ 清空数据</button>
-      <button class="modal-btn cancel" onclick="hideMenu()">取消</button>
-    </div>
-  </div>
-
-  <!-- 确认清空弹窗 -->
-  <div class="modal-overlay" id="clearConfirmModal" onclick="hideClearConfirmModal(event)">
-    <div class="modal" onclick="event.stopPropagation()">
-      <div class="modal-title">⚠️ 确认清空？</div>
-      <p style="text-align:center;color:var(--text-light);margin-bottom:16px;font-size:14px;">此操作不可恢复，请先导出备份</p>
-      <button class="modal-btn cancel" onclick="confirmClearData()" style="background:#e74c3c;color:white;">确认清空</button>
-      <button class="modal-btn cancel" onclick="hideClearConfirmModal()">取消</button>
-    </div>
-  </div>
-
-  <!-- 喂奶弹窗 -->
+  <!-- 弹窗们 -->
   <div class="modal-overlay" id="milkModal" onclick="hideMilkModal(event)">
     <div class="modal" onclick="event.stopPropagation()">
       <div class="modal-title">🍼 记录喂奶</div>
-      <div style="margin-bottom: 12px;">
-        <label style="font-size:13px;color:var(--text-light);display:block;margin-bottom:6px;">日期和时间</label>
-        <input type="datetime-local" id="milkDateTime"
-               style="width:100%;padding:12px;border:2px solid var(--border);border-radius:12px;font-size:14px;outline:none;">
-      </div>
+      <div class="form-group"><label>日期和时间</label><input type="datetime-local" id="milkDateTime"></div>
       <div style="display:flex;gap:10px;margin-bottom:12px;">
-        <button id="typeFormula" onclick="selectMilkType('formula')" 
-                style="flex:1;padding:12px;border:2px solid var(--border);border-radius:12px;background:white;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">
-          <span>🍼</span><span>奶粉</span>
-        </button>
-        <button id="typeBreast" onclick="selectMilkType('breast')"
-                style="flex:1;padding:12px;border:2px solid var(--border);border-radius:12px;background:white;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">
-          <span>🤱</span><span>母乳</span>
-        </button>
+        <button id="typeFormula" onclick="selectMilkType('formula')" style="flex:1;padding:12px;border:2px solid var(--border);border-radius:12px;background:white;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;"><span>🍼</span><span>奶粉</span></button>
+        <button id="typeBreast" onclick="selectMilkType('breast')" style="flex:1;padding:12px;border:2px solid var(--border);border-radius:12px;background:white;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;"><span>🤱</span><span>母乳</span></button>
       </div>
-      <div style="margin-bottom: 16px;">
-        <label style="font-size:13px;color:var(--text-light);display:block;margin-bottom:6px;">奶量（ml）</label>
-        <input type="number" id="milkAmount" placeholder="例如：120" 
-               style="width:100%;padding:12px;border:2px solid var(--border);border-radius:12px;font-size:14px;outline:none;">
-      </div>
+      <div class="form-group"><label>奶量（ml）</label><input type="number" id="milkAmount" placeholder="例如：120"></div>
       <button class="modal-btn export" onclick="confirmMilk()">确认记录</button>
       <button class="modal-btn cancel" onclick="hideMilkModal()">取消</button>
     </div>
   </div>
 
-  <!-- 大便/小便弹窗 -->
   <div class="modal-overlay" id="poopPeeModal" onclick="hidePoopPeeModal(event)">
     <div class="modal" onclick="event.stopPropagation()">
       <div class="modal-title" id="poopPeeTitle">💩 记录</div>
-      <div style="margin-bottom: 16px;">
-        <label style="font-size:13px;color:var(--text-light);display:block;margin-bottom:6px;">日期和时间</label>
-        <input type="datetime-local" id="poopPeeDateTime"
-               style="width:100%;padding:12px;border:2px solid var(--border);border-radius:12px;font-size:14px;outline:none;">
-      </div>
+      <div class="form-group"><label>日期和时间</label><input type="datetime-local" id="poopPeeDateTime"></div>
       <button class="modal-btn export" onclick="confirmPoopPee()">确认记录</button>
       <button class="modal-btn cancel" onclick="hidePoopPeeModal()">取消</button>
     </div>
   </div>
 
-  <!-- 亲喂弹窗 -->
   <div class="modal-overlay" id="breastFeedModal" onclick="hideBreastFeedModal(event)">
     <div class="modal" onclick="event.stopPropagation()">
       <div class="modal-title">🤱 记录亲喂</div>
-      <div style="margin-bottom: 16px;">
-        <label style="font-size:13px;color:var(--text-light);display:block;margin-bottom:6px;">日期和时间</label>
-        <input type="datetime-local" id="breastFeedDateTime"
-               style="width:100%;padding:12px;border:2px solid var(--border);border-radius:12px;font-size:14px;outline:none;">
-      </div>
+      <div class="form-group"><label>日期和时间</label><input type="datetime-local" id="breastFeedDateTime"></div>
       <button class="modal-btn export" onclick="confirmBreastFeed()">确认记录</button>
       <button class="modal-btn cancel" onclick="hideBreastFeedModal()">取消</button>
     </div>
   </div>
 
-  <!-- 体重弹窗 -->
   <div class="modal-overlay" id="weightModal" onclick="hideWeightModal(event)">
     <div class="modal" onclick="event.stopPropagation()">
       <div class="modal-title">⚖️ 记录体重</div>
-      <div style="margin-bottom: 12px;">
-        <label style="font-size:13px;color:var(--text-light);display:block;margin-bottom:6px;">日期</label>
-        <input type="date" id="weightDate"
-               style="width:100%;padding:12px;border:2px solid var(--border);border-radius:12px;font-size:14px;outline:none;">
-      </div>
-      <div style="margin-bottom: 16px;">
-        <label style="font-size:13px;color:var(--text-light);display:block;margin-bottom:6px;">体重（kg）</label>
-        <input type="number" id="weightAmount" step="0.01" placeholder="例如：6.55"
-               style="width:100%;padding:12px;border:2px solid var(--border);border-radius:12px;font-size:14px;outline:none;">
-      </div>
+      <div class="form-group"><label>日期</label><input type="date" id="weightDate"></div>
+      <div class="form-group"><label>体重（kg）</label><input type="number" id="weightAmount" step="0.01" placeholder="例如：6.55"></div>
       <button class="modal-btn export" onclick="confirmWeight()">确认记录</button>
       <button class="modal-btn cancel" onclick="hideWeightModal()">取消</button>
     </div>
   </div>
 
-  <!-- 宝宝信息弹窗 -->
-  <div class="modal-overlay" id="babyInfoModal">
+  <div class="modal-overlay" id="menuModal" onclick="hideMenu(event)">
     <div class="modal" onclick="event.stopPropagation()">
-      <div class="modal-title">👶 宝宝信息</div>
-      <div style="margin-bottom: 12px;">
-        <label style="font-size:13px;color:var(--text-light);display:block;margin-bottom:6px;">宝宝名字</label>
-        <input type="text" id="babyName" placeholder="例如：豆豆"
-               style="width:100%;padding:12px;border:2px solid var(--border);border-radius:12px;font-size:14px;outline:none;">
-      </div>
-      <div style="margin-bottom: 12px;">
-        <label style="font-size:13px;color:var(--text-light);display:block;margin-bottom:6px;">出生日期</label>
-        <input type="date" id="babyBirthday"
-               style="width:100%;padding:12px;border:2px solid var(--border);border-radius:12px;font-size:14px;outline:none;">
-      </div>
-      <div style="margin-bottom: 16px;">
-        <label style="font-size:13px;color:var(--text-light);display:block;margin-bottom:6px;">性别</label>
-        <div style="display:flex;gap:10px;">
-          <button id="genderBoy" onclick="selectGender('boy')" style="flex:1;padding:12px;border:2px solid var(--border);border-radius:12px;background:white;font-size:14px;cursor:pointer;">
-            👦 男宝
-          </button>
-          <button id="genderGirl" onclick="selectGender('girl')" style="flex:1;padding:12px;border:2px solid var(--border);border-radius:12px;background:white;font-size:14px;cursor:pointer;">
-            👧 女宝
-          </button>
-        </div>
-      </div>
-      <button class="modal-btn export" onclick="saveBabyInfoAndClose()">保存</button>
+      <div class="modal-title">更多操作</div>
+      <button class="modal-btn export" onclick="hideMenu();showBabyInfoModal();">👶 修改宝宝信息</button>
+      <button class="modal-btn export" onclick="hideMenu();doExport();">📤 导出数据</button>
+      <button class="modal-btn import" onclick="hideMenu();document.getElementById('importFile').click();">📥 导入数据</button>
+      <input type="file" id="importFile" accept=".json" onchange="doImport(event)" style="display:none;">
+      <button class="modal-btn cancel" onclick="hideMenu();showClearConfirmModal();" style="background:#ffeef0;color:#e74c3c;">🗑️ 清空记录</button>
+      <button class="modal-btn cancel" onclick="hideMenu()">关闭</button>
     </div>
   </div>
 
-  <!-- 今日详情弹窗 -->
+  <div class="modal-overlay" id="clearConfirmModal" onclick="hideClearConfirmModal(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-title">⚠️ 确认清空？</div>
+      <p style="text-align:center;color:var(--text-light);margin-bottom:16px;font-size:14px;">此操作不可恢复</p>
+      <button class="modal-btn cancel" onclick="confirmClearData()" style="background:#e74c3c;color:white;">确认清空</button>
+      <button class="modal-btn cancel" onclick="hideClearConfirmModal()">取消</button>
+    </div>
+  </div>
+
   <div class="modal-overlay" id="todayDetailModal" onclick="hideTodayDetailModal(event)">
     <div class="modal" onclick="event.stopPropagation()">
       <div class="modal-title" id="todayDetailTitle">📋 今日详情</div>
@@ -647,88 +290,259 @@
     </div>
   </div>
 
+  <div class="modal-overlay" id="babyInfoModal">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-title">👶 宝宝信息</div>
+      <div class="form-group"><label>宝宝名字</label><input type="text" id="babyName"></div>
+      <div class="form-group"><label>出生日期</label><input type="date" id="babyBirthday"></div>
+      <div class="form-group">
+        <label>性别</label>
+        <div class="gender-row">
+          <button id="genderBoy" onclick="selectGender('boy')" class="gender-btn" type="button">👦 男宝</button>
+          <button id="genderGirl" onclick="selectGender('girl')" class="gender-btn" type="button">👧 女宝</button>
+        </div>
+      </div>
+      <button class="modal-btn export" onclick="saveBabyInfo()">保存</button>
+    </div>
+  </div>
+
   <div class="toast" id="toast"></div>
 
   <script>
-    // ========== 配置 ==========
-    const STORAGE_KEY = 'baby_log_records';
+    // ========== Supabase 配置 ==========
+    const SUPABASE_URL = 'https://dgsnjitkxtffpquweiky.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_UM9wflLx3aLksX3qdB2wvA_SfJdSeN3';
+    const API = SUPABASE_URL + '/rest/v1';
+
     const TYPE_MAP = {
-      '大便':    { icon: '💩', class: 'poop' },
-      '小便':    { icon: '💧', class: 'pee' },
+      '大便': { icon: '💩', class: 'poop' },
+      '小便': { icon: '💧', class: 'pee' },
       '喝奶-奶粉': { icon: '🍼', class: 'milk' },
       '喝奶-母乳': { icon: '🍼', class: 'milk' },
-      '亲喂':     { icon: '🤱', class: 'breast' },
-      '体重':     { icon: '⚖️', class: 'weight' }
+      '亲喂': { icon: '🤱', class: 'breast' },
+      '体重': { icon: '⚖️', class: 'weight' }
     };
 
     let currentFilter = 'week';
     let currentChartFilter = 'milk';
     let selectedMilkType = 'formula';
     let pendingPoopPeeType = null;
+    let selectedGender = 'boy';
+    let regGender = 'boy';
+    let records = [];
+    let currentUser = null;
 
-    // 宝宝信息
-    const BABY_KEY = 'baby_info';
-    function getBabyInfo() {
-      const data = localStorage.getItem(BABY_KEY);
-      return data ? JSON.parse(data) : null;
+    // ========== Supabase API ==========
+    async function supabaseGet(table, params = '') {
+      const res = await fetch(`${API}/${table}${params}`, {
+        headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` }
+      });
+      if (!res.ok) throw new Error(await res.text());
+      return res.json();
     }
-    function saveBabyInfo(info) {
-      localStorage.setItem(BABY_KEY, JSON.stringify(info));
+
+    async function supabasePost(table, data) {
+      const res = await fetch(`${API}/${table}`, {
+        method: 'POST',
+        headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+        body: JSON.stringify(data)
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.message || err.error?.message || '请求失败');
+      }
+      return res.json();
     }
+
+    async function supabaseDelete(table, params) {
+      const res = await fetch(`${API}/${table}${params}`, {
+        method: 'DELETE',
+        headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` }
+      });
+      if (!res.ok) throw new Error(await res.text());
+    }
+
+    async function supabaseUpdate(table, data, params) {
+      const res = await fetch(`${API}/${table}${params}`, {
+        method: 'PATCH',
+        headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+        body: JSON.stringify(data)
+      });
+      if (!res.ok) throw new Error(await res.text());
+      return res.json();
+    }
+
+    // ========== 本地存储 ==========
+    function getStoredUser() {
+      try { return JSON.parse(localStorage.getItem('baby_log_user')); } catch { return null; }
+    }
+    function storeUser(user) { localStorage.setItem('baby_log_user', JSON.stringify(user)); }
+    function clearStoredUser() { localStorage.removeItem('baby_log_user'); }
+
+    // ========== 认证 ==========
+    function switchAuthTab(tab) {
+      document.querySelectorAll('.auth-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+      document.getElementById('loginForm').style.display = tab === 'login' ? 'block' : 'none';
+      document.getElementById('registerForm').style.display = tab === 'register' ? 'block' : 'none';
+      document.getElementById('loginError').textContent = '';
+      document.getElementById('registerError').textContent = '';
+    }
+
+    function selectRegGender(g) {
+      regGender = g;
+      document.getElementById('regBoy').classList.toggle('selected', g === 'boy');
+      document.getElementById('regGirl').classList.toggle('selected', g === 'girl');
+    }
+
+    async function doRegister() {
+      const name = document.getElementById('regName').value.trim();
+      const birthday = document.getElementById('regBirthday').value;
+      const err = document.getElementById('registerError');
+      err.textContent = '';
+      if (!name) { err.textContent = '请输入宝宝名字'; return; }
+      if (!birthday) { err.textContent = '请选择出生日期'; return; }
+      try {
+        const users = await supabaseGet('users', `?name=eq.${encodeURIComponent(name)}&limit=1`);
+        if (users.length > 0) { err.textContent = '这个名字已经被注册了'; return; }
+        const newUser = await supabasePost('users', { name, birthday, gender: regGender });
+        const user = newUser[0];
+        storeUser(user);
+        currentUser = user;
+        showApp();
+        showToast('✅ 注册成功！');
+      } catch (e) { err.textContent = e.message; }
+    }
+
+    async function doLogin() {
+      const name = document.getElementById('loginName').value.trim();
+      const err = document.getElementById('loginError');
+      err.textContent = '';
+      if (!name) { err.textContent = '请输入宝宝名字'; return; }
+      try {
+        const users = await supabaseGet('users', `?name=eq.${encodeURIComponent(name)}&limit=1`);
+        if (users.length === 0) { err.textContent = '未找到这个名字的用户，请先注册'; return; }
+        const user = users[0];
+        storeUser(user);
+        currentUser = user;
+        showApp();
+        showToast(`👋 欢迎回来，${user.name}！`);
+      } catch (e) { err.textContent = e.message; }
+    }
+
+    function doLogout() {
+      clearStoredUser();
+      currentUser = null;
+      records = [];
+      document.getElementById('authScreen').style.display = 'flex';
+      document.getElementById('appScreen').classList.remove('active');
+      document.getElementById('loginName').value = '';
+    }
+
+    function showApp() {
+      document.getElementById('authScreen').style.display = 'none';
+      document.getElementById('appScreen').classList.add('active');
+      initApp();
+    }
+
+    // ========== 辅助 ==========
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg; t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 1500);
+    }
+
     function calcAge(birthDate) {
       if (!birthDate) return '';
       const birth = new Date(birthDate);
       const now = new Date();
-      const diffMs = now - birth;
-      const totalDays = Math.floor(diffMs / 86400000);
+      const totalDays = Math.floor((now - birth) / 86400000);
       if (totalDays < 0) return '未出生';
       if (totalDays < 30) return `${totalDays}天`;
       const months = Math.floor(totalDays / 30);
       const days = totalDays % 30;
       if (months < 12) return `${months}个月${days > 0 ? days + '天' : ''}`;
       const years = Math.floor(months / 12);
-      const remainingMonths = months % 12;
-      return `${years}岁${remainingMonths > 0 ? remainingMonths + '个月' : ''}`;
+      const rem = months % 12;
+      return `${years}岁${rem > 0 ? rem + '个月' : ''}`;
     }
 
-    // ========== 存储 ==========
-    function getRecords() {
-      const data = localStorage.getItem(STORAGE_KEY);
-      return data ? JSON.parse(data) : [];
+    function getStartOfWeek(d) { const day = d.getDay() || 7; return new Date(d - (day - 1) * 86400000); }
+    function getStartOfMonth(d) { return new Date(d.getFullYear(), d.getMonth(), 1); }
+    function formatFull(iso) {
+      const d = new Date(iso);
+      return `${d.getMonth()+1}月${d.getDate()}日 ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
+    }
+    function getRelativeTime(iso) {
+      const now = new Date(); const diffMin = Math.floor((now - new Date(iso)) / 60000);
+      if (diffMin < 1) return '刚刚';
+      if (diffMin < 60) return `${diffMin}分钟前`;
+      const diffHr = Math.floor(diffMin / 60);
+      if (diffHr < 24) return `${diffHr}小时前`;
+      const diffDay = Math.floor(diffHr / 24);
+      return diffDay < 7 ? `${diffDay}天前` : formatFull(iso);
     }
 
-    function saveRecords(records) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+    // ========== 初始化 ==========
+    async function initApp() {
+      await loadRecords();
+      await updateStats();
+      updateBabyHeader();
     }
 
-    function addRecord(type, amount, time) {
-      const records = getRecords();
-      records.push({ id: Date.now().toString(), type, time: time || new Date().toISOString(), amount: amount || null });
-      saveRecords(records);
-      return records[records.length - 1];
+    // ========== 数据 ==========
+    async function loadRecords() {
+      if (!currentUser) return;
+      try { records = await supabaseGet('records', `?user_id=eq.${currentUser.id}&order=time.desc&limit=500`); }
+      catch { records = []; }
     }
 
-    // ========== UI ==========
-    function showToast(msg) {
-      const toast = document.getElementById('toast');
-      toast.textContent = msg;
-      toast.classList.add('show');
-      setTimeout(() => toast.classList.remove('show'), 1500);
+    async function updateStats() {
+      if (records.length === 0) await loadRecords();
+      const todayStart = getStartOfDay(new Date());
+      let poo = 0, pee = 0, milkAmt = 0, feedCnt = 0;
+      records.forEach(r => {
+        const t = new Date(r.time);
+        if (t >= todayStart) {
+          if (r.type === '大便') poo++;
+          else if (r.type === '小便') pee++;
+          else if (r.type === '亲喂') feedCnt++;
+          else if (r.type === '喝奶-奶粉' || r.type === '喝奶-母乳') { milkAmt += (r.amount || 0); feedCnt++; }
+        }
+      });
+      document.getElementById('todayPoop').textContent = poo;
+      document.getElementById('todayPee').textContent = pee;
+      document.getElementById('todayMilkAmount').textContent = milkAmt;
+      document.getElementById('todayFeedCount').textContent = feedCnt;
     }
 
-    function showMenu() { document.getElementById('menuModal').classList.add('show'); }
-    function hideMenu(e) { if (e && e.target !== e.currentTarget) return; document.getElementById('menuModal').classList.remove('show'); }
+    function updateBabyHeader() {
+      if (!currentUser) return;
+      document.getElementById('headerBabyName').textContent = currentUser.name;
+      document.getElementById('headerBabyIcon').textContent = currentUser.gender === 'girl' ? '👧' : '👦';
+      document.getElementById('headerBabyAge').textContent = calcAge(currentUser.birthday);
+    }
+
+    // ========== 记录 ==========
+    async function record(type) {
+      if (type === '大便' || type === '小便') { showPoopPeeModal(type); return; }
+      if (type === '亲喂') { showBreastFeedModal(); return; }
+      if (type === '体重') { showWeightModal(); return; }
+      if (type === '喂奶') { showFeedMilkModal(); return; }
+    }
+
+    async function doAddRecord(type, amount, time) {
+      if (navigator.vibrate) navigator.vibrate(50);
+      await supabasePost('records', { id: Date.now().toString(), user_id: currentUser.id, type, time, amount });
+      await loadRecords();
+    }
 
     function showFeedMilkModal() {
       selectedMilkType = 'formula';
       updateMilkTypeUI();
       document.getElementById('milkAmount').value = '';
-      // 默认当前时间
       const now = new Date();
-      const iso = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
-      document.getElementById('milkDateTime').value = iso;
+      document.getElementById('milkDateTime').value = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
       document.getElementById('milkModal').classList.add('show');
-      setTimeout(() => document.getElementById('milkAmount').focus(), 100);
     }
 
     function selectMilkType(type) {
@@ -737,270 +551,89 @@
     }
 
     function updateMilkTypeUI() {
-      const normalBorder = '2px solid var(--border)';
-      const formulaBtn = document.getElementById('typeFormula');
-      const breastBtn = document.getElementById('typeBreast');
+      const fb = document.getElementById('typeFormula');
+      const bb = document.getElementById('typeBreast');
       if (selectedMilkType === 'formula') {
-        formulaBtn.style.borderColor = 'var(--milk)';
-        formulaBtn.style.background = 'var(--milk-bg)';
-        breastBtn.style.borderColor = normalBorder;
-        breastBtn.style.background = 'white';
+        fb.style.borderColor = 'var(--milk)'; fb.style.background = 'var(--milk-bg)';
+        bb.style.borderColor = 'var(--border)'; bb.style.background = 'white';
       } else {
-        breastBtn.style.borderColor = 'var(--breast)';
-        breastBtn.style.background = 'var(--breast-bg)';
-        formulaBtn.style.borderColor = normalBorder;
-        formulaBtn.style.background = 'white';
+        bb.style.borderColor = 'var(--breast)'; bb.style.background = 'var(--breast-bg)';
+        fb.style.borderColor = 'var(--border)'; fb.style.background = 'white';
       }
     }
 
-    function hideMilkModal(e) {
-      if (e && e.target !== e.currentTarget) return;
-      document.getElementById('milkModal').classList.remove('show');
-    }
+    function hideMilkModal(e) { if (e && e.target !== e.currentTarget) return; document.getElementById('milkModal').classList.remove('show'); }
 
-    function confirmMilk() {
+    async function confirmMilk() {
       const amount = document.getElementById('milkAmount').value;
-      if (!amount || parseInt(amount) <= 0) {
-        showToast('请输入奶量');
-        return;
-      }
-      const datetimeInput = document.getElementById('milkDateTime').value;
-      const time = datetimeInput ? new Date(datetimeInput).toISOString() : new Date().toISOString();
+      if (!amount || parseInt(amount) <= 0) { showToast('请输入奶量'); return; }
+      const dt = document.getElementById('milkDateTime').value;
+      const time = dt ? new Date(dt).toISOString() : new Date().toISOString();
       const type = selectedMilkType === 'formula' ? '喝奶-奶粉' : '喝奶-母乳';
-      if (navigator.vibrate) navigator.vibrate(50);
-      addRecord(type, parseInt(amount), time);
       hideMilkModal();
-      const icon = type === '喝奶-奶粉' ? '🍼' : '🤱';
-      showToast(`${icon} 已记录 ${amount}ml`);
-      updateStats();
+      await doAddRecord(type, parseInt(amount), time);
+      await updateStats();
+      showToast(`🍼 已记录 ${amount}ml`);
     }
 
-    // 大便/小便弹窗
     function showPoopPeeModal(type) {
       pendingPoopPeeType = type;
       document.getElementById('poopPeeTitle').textContent = type === '大便' ? '💩 记录大便' : '💧 记录小便';
       const now = new Date();
-      const iso = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
-      document.getElementById('poopPeeDateTime').value = iso;
+      document.getElementById('poopPeeDateTime').value = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
       document.getElementById('poopPeeModal').classList.add('show');
     }
 
-    function hidePoopPeeModal(e) {
-      if (e && e.target !== e.currentTarget) return;
-      document.getElementById('poopPeeModal').classList.remove('show');
-    }
+    function hidePoopPeeModal(e) { if (e && e.target !== e.currentTarget) return; document.getElementById('poopPeeModal').classList.remove('show'); }
 
-    function confirmPoopPee() {
-      const datetimeInput = document.getElementById('poopPeeDateTime').value;
-      const time = datetimeInput ? new Date(datetimeInput).toISOString() : new Date().toISOString();
-      if (navigator.vibrate) navigator.vibrate(50);
-      addRecord(pendingPoopPeeType, null, time);
+    async function confirmPoopPee() {
+      const dt = document.getElementById('poopPeeDateTime').value;
+      const time = dt ? new Date(dt).toISOString() : new Date().toISOString();
       hidePoopPeeModal();
-      const icon = pendingPoopPeeType === '大便' ? '💩' : '💧';
-      showToast(`${icon} 已记录`);
-      updateStats();
+      await doAddRecord(pendingPoopPeeType, null, time);
+      await updateStats();
+      showToast(`${pendingPoopPeeType === '大便' ? '💩' : '💧'} 已记录`);
     }
 
-    // 亲喂弹窗
     function showBreastFeedModal() {
       const now = new Date();
-      const iso = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
-      document.getElementById('breastFeedDateTime').value = iso;
+      document.getElementById('breastFeedDateTime').value = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
       document.getElementById('breastFeedModal').classList.add('show');
     }
 
-    function hideBreastFeedModal(e) {
-      if (e && e.target !== e.currentTarget) return;
-      document.getElementById('breastFeedModal').classList.remove('show');
-    }
+    function hideBreastFeedModal(e) { if (e && e.target !== e.currentTarget) return; document.getElementById('breastFeedModal').classList.remove('show'); }
 
-    function confirmBreastFeed() {
-      const datetimeInput = document.getElementById('breastFeedDateTime').value;
-      const time = datetimeInput ? new Date(datetimeInput).toISOString() : new Date().toISOString();
-      if (navigator.vibrate) navigator.vibrate(50);
-      addRecord('亲喂', null, time);
+    async function confirmBreastFeed() {
+      const dt = document.getElementById('breastFeedDateTime').value;
+      const time = dt ? new Date(dt).toISOString() : new Date().toISOString();
       hideBreastFeedModal();
+      await doAddRecord('亲喂', null, time);
+      await updateStats();
       showToast('🤱 亲喂已记录');
-      updateStats();
     }
 
-    // 体重弹窗
     function showWeightModal() {
       const now = new Date();
-      const dateStr = now.toISOString().slice(0, 10);
-      document.getElementById('weightDate').value = dateStr;
+      document.getElementById('weightDate').value = now.toISOString().slice(0, 10);
       document.getElementById('weightAmount').value = '';
       document.getElementById('weightModal').classList.add('show');
       setTimeout(() => document.getElementById('weightAmount').focus(), 100);
     }
 
-    function hideWeightModal(e) {
-      if (e && e.target !== e.currentTarget) return;
-      document.getElementById('weightModal').classList.remove('show');
-    }
+    function hideWeightModal(e) { if (e && e.target !== e.currentTarget) return; document.getElementById('weightModal').classList.remove('show'); }
 
-    function confirmWeight() {
+    async function confirmWeight() {
       const amount = document.getElementById('weightAmount').value;
       const dateInput = document.getElementById('weightDate').value;
-      if (!amount || parseFloat(amount) <= 0) {
-        showToast('请输入正确的体重');
-        return;
-      }
+      if (!amount || parseFloat(amount) <= 0) { showToast('请输入正确的体重'); return; }
       const time = dateInput ? new Date(dateInput + 'T12:00:00').toISOString() : new Date().toISOString();
-      if (navigator.vibrate) navigator.vibrate(50);
-      addRecord('体重', parseFloat(amount), time);
       hideWeightModal();
+      await doAddRecord('体重', parseFloat(amount), time);
+      await updateStats();
       showToast(`⚖️ 体重 ${amount}kg 已记录`);
-      updateStats();
     }
 
-    // 今日详情弹窗
-    function showTodayDetail(type) {
-      const records = getRecords();
-      const now = new Date();
-      const todayStart = getStartOfDay(now);
-
-      const titleMap = {
-        '大便': '💩 今日大便',
-        '小便': '💧 今日小便',
-        '喝奶': '🍼 今日喝奶（瓶喂）',
-        '喂奶': '🍼🤱 今日喂奶（全部）'
-      };
-
-      document.getElementById('todayDetailTitle').textContent = titleMap[type] || '📋 今日详情';
-
-      let filtered = records.filter(r => {
-        const t = new Date(r.time);
-        if (t < todayStart) return false;
-        if (type === '大便') return r.type === '大便';
-        if (type === '小便') return r.type === '小便';
-        if (type === '喝奶') return r.type === '喝奶-奶粉' || r.type === '喝奶-母乳';
-        if (type === '喂奶') return r.type === '喝奶-奶粉' || r.type === '喝奶-母乳' || r.type === '亲喂';
-        return false;
-      });
-
-      filtered.sort((a, b) => new Date(b.time) - new Date(a.time));
-
-      if (filtered.length === 0) {
-        document.getElementById('todayDetailList').innerHTML = '<div style="text-align:center;color:var(--text-light);padding:20px;">暂无记录</div>';
-      } else {
-        document.getElementById('todayDetailList').innerHTML = filtered.map(r => {
-          const d = new Date(r.time);
-          const h = d.getHours().toString().padStart(2, '0');
-          const m = d.getMinutes().toString().padStart(2, '0');
-          const map = TYPE_MAP[r.type] || TYPE_MAP['大便'];
-          const amountStr = (r.amount && r.amount > 0) ? ` ${r.amount}ml` : '';
-          return `
-            <div style="display:flex;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);">
-              <span style="font-size:22px;margin-right:12px;">${map.icon}</span>
-              <span style="flex:1;font-size:14px;">${r.type}${amountStr}</span>
-              <span style="color:var(--text-light);font-size:14px;">${h}:${m}</span>
-            </div>
-          `;
-        }).join('');
-      }
-
-      document.getElementById('todayDetailModal').classList.add('show');
-    }
-
-    function hideTodayDetailModal(e) {
-      if (e && e.target !== e.currentTarget) return;
-      document.getElementById('todayDetailModal').classList.remove('show');
-    }
-
-    function showClearConfirmModal() {
-      document.getElementById('clearConfirmModal').classList.add('show');
-    }
-
-    function hideClearConfirmModal(e) {
-      if (e && e.target !== e.currentTarget) return;
-      document.getElementById('clearConfirmModal').classList.remove('show');
-    }
-
-    let selectedGender = 'boy';
-
-    function showBabyInfoModal() {
-      const info = getBabyInfo();
-      if (info) {
-        document.getElementById('babyName').value = info.name || '';
-        document.getElementById('babyBirthday').value = info.birthday || '';
-        selectedGender = info.gender || 'boy';
-      } else {
-        document.getElementById('babyName').value = '';
-        document.getElementById('babyBirthday').value = '';
-        selectedGender = 'boy';
-      }
-      updateGenderUI();
-      document.getElementById('babyInfoModal').classList.add('show');
-      setTimeout(() => document.getElementById('babyName').focus(), 100);
-    }
-
-    function hideBabyInfoModal() {
-      document.getElementById('babyInfoModal').classList.remove('show');
-    }
-
-    function selectGender(g) {
-      selectedGender = g;
-      updateGenderUI();
-    }
-
-    function updateGenderUI() {
-      const boyBtn = document.getElementById('genderBoy');
-      const girlBtn = document.getElementById('genderGirl');
-      if (selectedGender === 'boy') {
-        boyBtn.style.borderColor = 'var(--primary)';
-        boyBtn.style.background = 'var(--primary-light)';
-        girlBtn.style.borderColor = 'var(--border)';
-        girlBtn.style.background = 'white';
-      } else {
-        girlBtn.style.borderColor = 'var(--primary)';
-        girlBtn.style.background = 'var(--primary-light)';
-        boyBtn.style.borderColor = 'var(--border)';
-        boyBtn.style.background = 'white';
-      }
-    }
-
-    function saveBabyInfoAndClose() {
-      const name = document.getElementById('babyName').value.trim();
-      const birthday = document.getElementById('babyBirthday').value;
-      if (!name) {
-        showToast('请输入宝宝名字');
-        return;
-      }
-      if (!birthday) {
-        showToast('请选择出生日期');
-        return;
-      }
-      saveBabyInfo({ name, birthday, gender: selectedGender });
-      hideBabyInfoModal();
-      updateBabyHeader();
-      showToast('✅ 宝宝信息已保存');
-    }
-
-    function updateBabyHeader() {
-      const info = getBabyInfo();
-      const iconEl = document.getElementById('headerBabyIcon');
-      const nameEl = document.getElementById('headerBabyName');
-      const ageEl = document.getElementById('headerBabyAge');
-      if (info && info.name) {
-        nameEl.textContent = info.name;
-        iconEl.textContent = info.gender === 'girl' ? '👧' : '👦';
-        ageEl.textContent = calcAge(info.birthday);
-      } else {
-        nameEl.textContent = '宝宝';
-        iconEl.textContent = '👶';
-        ageEl.textContent = '';
-      }
-    }
-
-    function confirmClearData() {
-      localStorage.removeItem(STORAGE_KEY);
-      hideClearConfirmModal();
-      hideMenu();
-      showToast('🗑️ 数据已清空');
-      updateStats();
-    }
-
+    // ========== 历史 ==========
     function switchTab(tabId) {
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tabId));
       document.querySelectorAll('.tab-content').forEach(c => c.classList.toggle('active', c.id === tabId));
@@ -1009,356 +642,221 @@
 
     function setHistoryFilter(filter) {
       currentFilter = filter;
-      document.querySelectorAll('.filter-btn').forEach(b => {
-        if (b.dataset.filter) b.classList.toggle('active', b.dataset.filter === filter);
-      });
+      document.querySelectorAll('.filter-btn[data-filter]').forEach(b => b.classList.toggle('active', b.dataset.filter === filter));
       loadHistory();
     }
 
     function setChartFilter(filter) {
       currentChartFilter = filter;
-      document.querySelectorAll('[data-chart]').forEach(b => {
-        b.classList.toggle('active', b.dataset.chart === filter);
-      });
+      document.querySelectorAll('[data-chart]').forEach(b => b.classList.toggle('active', b.dataset.chart === filter));
       drawChart();
     }
 
-    function formatTime(iso) {
-      const d = new Date(iso);
-      return `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
-    }
-
-    function formatDate(iso) {
-      const d = new Date(iso);
-      return `${d.getMonth()+1}月${d.getDate()}日`;
-    }
-
-    function formatFull(iso) {
-      const d = new Date(iso);
-      const mon = d.getMonth() + 1;
-      const day = d.getDate();
-      const h = d.getHours().toString().padStart(2, '0');
-      const m = d.getMinutes().toString().padStart(2, '0');
-      return `${mon}月${day}日 ${h}:${m}`;
-    }
-
-    function getRelativeTime(iso) {
-      const now = new Date();
-      const d = new Date(iso);
-      const diffMs = now - d;
-      const diffMin = Math.floor(diffMs / 60000);
-      const diffHr = Math.floor(diffMin / 60);
-      const diffDay = Math.floor(diffHr / 24);
-      if (diffMin < 1) return '刚刚';
-      if (diffMin < 60) return `${diffMin}分钟前`;
-      if (diffHr < 24) return `${diffHr}小时前`;
-      if (diffDay < 7) return `${diffDay}天前`;
-      return formatDate(iso);
-    }
-
-    // ========== 记录 ==========
-    function record(type) {
-      // 大便小便弹出时间选择
-      if (type === '大便' || type === '小便') {
-        showPoopPeeModal(type);
-        return;
-      }
-      // 亲喂弹出时间选择
-      if (type === '亲喂') {
-        showBreastFeedModal();
-        return;
-      }
-      // 体重弹出体重输入
-      if (type === '体重') {
-        showWeightModal();
-        return;
-      }
-      // 瓶喂走另一个弹窗
-      if (type === '喂奶') {
-        showFeedMilkModal();
-        return;
-      }
-      if (navigator.vibrate) navigator.vibrate(50);
-      addRecord(type);
-      const icon = type === '大便' ? '💩' : '💧';
-      showToast(`${icon} 已记录`);
-      updateStats();
-    }
-
-    // ========== 统计 ==========
-    function getStartOfDay(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
-    function getStartOfWeek(d) { const day = d.getDay() || 7; return new Date(d - (day - 1) * 86400000); }
-    function getStartOfMonth(d) { return new Date(d.getFullYear(), d.getMonth(), 1); }
-
-    function updateStats() {
-      const records = getRecords();
-      const now = new Date();
-      const todayStart = getStartOfDay(now);
-
-      let todayPoop = 0, todayPee = 0, todayMilkAmount = 0, todayFeedCount = 0;
-
-      records.forEach(r => {
-        const t = new Date(r.time);
-        if (t >= todayStart) {
-          if (r.type === '大便') todayPoop++;
-          else if (r.type === '小便') todayPee++;
-          else if (r.type === '喝奶-奶粉' || r.type === '喝奶-母乳' || r.type === '亲喂') {
-            if (r.type === '亲喂') {
-              todayFeedCount++;
-            } else {
-              todayMilkAmount += (r.amount || 0);
-              todayFeedCount++;
-            }
-          }
-        }
-      });
-
-      document.getElementById('todayPoop').textContent = todayPoop;
-      document.getElementById('todayPee').textContent = todayPee;
-      document.getElementById('todayMilkAmount').textContent = todayMilkAmount;
-      document.getElementById('todayFeedCount').textContent = todayFeedCount;
-    }
-
-    // ========== 历史 ==========
-    function drawChart() {
-      const records = getRecords();
-      const now = new Date();
-      let days = 7;
-      if (currentFilter === 'week') days = 7;
-      else if (currentFilter === 'month') days = 30;
-      else if (currentFilter === 'all') days = 90;
-      else days = 1;
-
-      const startDate = new Date(now);
-      startDate.setDate(startDate.getDate() - days + 1);
-      startDate.setHours(0, 0, 0, 0);
-
-      // 生成日期标签和数据
-      const labels = [];
-      const dataPoints = [];
-      for (let i = 0; i < days; i++) {
-        const d = new Date(startDate);
-        d.setDate(d.getDate() + i);
-        labels.push(`${d.getMonth() + 1}/${d.getDate()}`);
-      }
-
-      // 按天聚合数据
-      for (let i = 0; i < days; i++) {
-        const dayStart = new Date(startDate);
-        dayStart.setDate(dayStart.getDate() + i);
-        const dayEnd = new Date(dayStart);
-        dayEnd.setDate(dayEnd.getDate() + 1);
-
-        const dayRecords = records.filter(r => {
-          const t = new Date(r.time);
-          return t >= dayStart && t < dayEnd;
-        });
-
-        if (currentChartFilter === 'milk') {
-          // 每日喝奶总量
-          const total = dayRecords
-            .filter(r => r.type === '喝奶-奶粉' || r.type === '喝奶-母乳')
-            .reduce((sum, r) => sum + (r.amount || 0), 0);
-          dataPoints.push(total);
-        } else if (currentChartFilter === 'maxMilk') {
-          // 每日最大单次喝奶量
-          const amounts = dayRecords
-            .filter(r => r.type === '喝奶-奶粉' || r.type === '喝奶-母乳')
-            .map(r => r.amount || 0);
-          dataPoints.push(amounts.length > 0 ? Math.max(...amounts) : 0);
-        } else if (currentChartFilter === 'weight') {
-          // 体重取最新的
-          const weightRecs = dayRecords.filter(r => r.type === '体重');
-          if (weightRecs.length > 0) {
-            dataPoints.push(weightRecs[weightRecs.length - 1].amount);
-          } else {
-            dataPoints.push(null);
-          }
-        }
-      }
-
-      // 画图
-      const canvas = document.getElementById('trendChart');
-      const ctx = canvas.getContext('2d');
-      const container = document.getElementById('chartContainer');
-      canvas.width = container.offsetWidth * 2;
-      canvas.height = container.offsetHeight * 2;
-      canvas.style.width = container.offsetWidth + 'px';
-      canvas.style.height = container.offsetHeight + 'px';
-      ctx.scale(2, 2);
-
-      const w = container.offsetWidth;
-      const h = container.offsetHeight;
-      const padding = { top: 10, right: 10, bottom: 30, left: 45 };
-      const chartW = w - padding.left - padding.right;
-      const chartH = h - padding.top - padding.bottom;
-
-      ctx.clearRect(0, 0, w, h);
-
-      // 只显示有数据的天
-      const validData = dataPoints.map((v, i) => v !== null && v !== undefined && !isNaN(v) ? v : null);
-      const validValues = validData.filter(v => v !== null);
-      if (validValues.length === 0) {
-        ctx.fillStyle = '#999';
-        ctx.font = '14px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText('暂无数据', w / 2, h / 2);
-        document.getElementById('chartSummary').textContent = '';
-        return;
-      }
-
-      const maxVal = Math.max(...validValues) * 1.2;
-      const minVal = Math.min(...validValues) * 0.9;
-      const range = maxVal - minVal || 1;
-
-      // 画Y轴标签和网格线
-      ctx.strokeStyle = '#eee';
-      ctx.fillStyle = '#999';
-      ctx.font = '10px sans-serif';
-      ctx.textAlign = 'right';
-      const ySteps = 4;
-      for (let i = 0; i <= ySteps; i++) {
-        const y = padding.top + chartH - (i / ySteps) * chartH;
-        const val = minVal + (i / ySteps) * range;
-        ctx.fillText(currentChartFilter === 'weight' ? val.toFixed(1) : Math.round(val).toString(), padding.left - 5, y + 3);
-        ctx.beginPath();
-        ctx.moveTo(padding.left, y);
-        ctx.lineTo(w - padding.right, y);
-        ctx.stroke();
-      }
-
-      // X轴标签
-      ctx.textAlign = 'center';
-      const step = days <= 7 ? 1 : days <= 30 ? 7 : 10;
-      labels.forEach((label, i) => {
-        if (i % step === 0 || i === days - 1) {
-          const x = padding.left + (i / (days - 1 || 1)) * chartW;
-          ctx.fillText(label, x, h - 8);
-        }
-      });
-
-      // 画线
-      const drawLine = (data, color) => {
-        ctx.beginPath();
-        ctx.strokeStyle = color;
-        ctx.lineWidth = 2;
-        let started = false;
-        data.forEach((v, i) => {
-          if (v === null) return;
-          const x = padding.left + (i / (days - 1 || 1)) * chartW;
-          const y = padding.top + chartH - ((v - minVal) / range) * chartH;
-          if (!started) { ctx.moveTo(x, y); started = true; }
-          else ctx.lineTo(x, y);
-        });
-        ctx.stroke();
-
-        // 画点
-        data.forEach((v, i) => {
-          if (v === null) return;
-          const x = padding.left + (i / (days - 1 || 1)) * chartW;
-          const y = padding.top + chartH - ((v - minVal) / range) * chartH;
-          ctx.beginPath();
-          ctx.fillStyle = color;
-          ctx.arc(x, y, 4, 0, Math.PI * 2);
-          ctx.fill();
-        });
-      };
-
-      if (currentChartFilter === 'milk') {
-        drawLine(dataPoints, '#6c5ce7');
-        document.getElementById('chartSummary').textContent = `近${days}天累计喝奶 ${dataPoints.reduce((a,b)=>a+(b||0),0)}ml`;
-      } else if (currentChartFilter === 'maxMilk') {
-        drawLine(dataPoints, '#e17055');
-        document.getElementById('chartSummary').textContent = `近${days}天最大单次 ${Math.max(...validValues)}ml`;
-      } else if (currentChartFilter === 'weight') {
-        drawLine(dataPoints, '#a29bfe');
-        const weightVals = validValues;
-        if (weightVals.length >= 2) {
-          const diff = (weightVals[weightVals.length-1] - weightVals[0]).toFixed(2);
-          document.getElementById('chartSummary').textContent = `体重 ${diff > 0 ? '+' : ''}${diff}kg（近${days}天）`;
-        } else if (weightVals.length === 1) {
-          document.getElementById('chartSummary').textContent = `当前体重 ${weightVals[0]}kg`;
-        }
-      }
-    }
-
-    function loadHistory() {
-      drawChart();
-      const records = getRecords();
+    async function loadHistory() {
+      await loadRecords();
+      await drawChart();
       const now = new Date();
       let startDate = null;
-
       if (currentFilter === 'week') startDate = getStartOfWeek(now);
       else if (currentFilter === 'month') startDate = getStartOfMonth(now);
-
-      const filtered = startDate
-        ? records.filter(r => new Date(r.time) >= startDate)
-        : records;
-
-      // 列表
+      const filtered = startDate ? records.filter(r => new Date(r.time) >= startDate) : records;
       const sorted = [...filtered].sort((a, b) => new Date(b.time) - new Date(a.time));
-
       const list = document.getElementById('historyList');
-      if (sorted.length === 0) {
-        list.innerHTML = '<div class="history-empty">暂无记录</div>';
-        return;
-      }
-
+      if (sorted.length === 0) { list.innerHTML = '<div class="history-empty">暂无记录</div>'; return; }
       list.innerHTML = sorted.map(r => {
         const map = TYPE_MAP[r.type] || TYPE_MAP['大便'];
-        const amountStr = (r.amount && r.amount > 0) ? ` ${r.amount}ml` : '';
-        const weightStr = (r.type === '体重') ? ` ${r.amount}kg` : '';
-        return `
-          <div class="history-item ${map.class}">
-            <div class="time">${formatFull(r.time)}</div>
-            <div class="type-icon">${map.icon}</div>
-            <div class="info">
-              <div class="type-name ${map.class}">${r.type}${amountStr}${weightStr}</div>
-              <div class="relative">${getRelativeTime(r.time)}</div>
-            </div>
+        const extra = r.type === '体重' ? ` ${r.amount}kg` : (r.amount ? ` ${r.amount}ml` : '');
+        return `<div class="history-item ${map.class}">
+          <div class="time">${formatFull(r.time)}</div>
+          <div class="type-icon">${map.icon}</div>
+          <div class="info">
+            <div class="type-name ${map.class}">${r.type}${extra}</div>
+            <div class="relative">${getRelativeTime(r.time)}</div>
           </div>
-        `;
+        </div>`;
       }).join('');
     }
 
-    // ========== 导入导出 ==========
-    function exportData() {
-      const blob = new Blob([JSON.stringify(getRecords(), null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url; a.download = `baby-log-${new Date().toISOString().slice(0,10)}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
-      hideMenu();
-      showToast('📤 导出成功');
-    }
+    async function drawChart() {
+      if (records.length === 0) await loadRecords();
+      const now = new Date();
+      const days = currentFilter === 'week' ? 7 : currentFilter === 'month' ? 30 : 90;
+      const startDate = new Date(now - days * 86400000);
+      const filtered = records.filter(r => new Date(r.time) >= startDate);
+      const ctx = document.getElementById('trendChart');
+      if (!ctx) return;
+      const canvas = ctx;
+      const cvs = canvas.getContext('2d');
+      const W = canvas.width = canvas.offsetWidth * 2;
+      const H = canvas.height = canvas.offsetHeight * 2;
+      cvs.scale(2, 2);
+      const w = canvas.offsetWidth, h = canvas.offsetHeight;
+      cvs.clearRect(0, 0, w, h);
 
-    async function importData(file) {
-      if (!file) return;
-      try {
-        const imported = JSON.parse(await file.text());
-        if (!Array.isArray(imported)) throw new Error('格式错误');
-        const existing = getRecords();
-        const seen = new Set(existing.map(r => r.id));
-        const newRecords = imported.filter(r => !seen.has(r.id));
-        saveRecords([...existing, ...newRecords]);
-        hideMenu();
-        showToast(`✅ 导入成功，新增 ${newRecords.length} 条`);
-        updateStats();
-        if (document.getElementById('historyTab').classList.contains('active')) loadHistory();
-      } catch (e) {
-        hideMenu();
-        showToast('❌ 导入失败');
+      if (currentChartFilter === 'milk' || currentChartFilter === 'maxMilk') {
+        const byDay = {};
+        filtered.filter(r => r.type === '喝奶-奶粉' || r.type === '喝奶-母乳').forEach(r => {
+          const d = new Date(r.time).toISOString().slice(0, 10);
+          if (!byDay[d]) byDay[d] = [];
+          byDay[d].push(r.amount || 0);
+        });
+        const dates = Object.keys(byDay).sort();
+        if (dates.length === 0) { document.getElementById('chartSummary').textContent = '暂无喝奶数据'; return; }
+        const vals = dates.map(d => currentChartFilter === 'maxMilk' ? Math.max(...byDay[d]) : byDay[d].reduce((a, b) => a + b, 0));
+        const max = Math.max(...vals, 1);
+        const barW = (w - 40) / Math.max(dates.length, 1);
+        cvs.fillStyle = '#fdcb6e';
+        vals.forEach((v, i) => { cvs.fillRect(20 + i * barW + 2, h - 20 - (v / max) * (h - 30), barW - 4, (v / max) * (h - 30)); });
+        const total = vals.reduce((a, b) => a + b, 0);
+        document.getElementById('chartSummary').textContent = currentChartFilter === 'maxMilk' ? `最大单次：${Math.max(...vals)}ml` : `累计奶量：${total}ml（${vals.length}天）`;
+      } else {
+        const weights = filtered.filter(r => r.type === '体重').sort((a, b) => new Date(a.time) - new Date(b.time));
+        if (weights.length === 0) { document.getElementById('chartSummary').textContent = '暂无体重数据'; return; }
+        const minW = Math.min(...weights.map(r => r.amount));
+        const maxW = Math.max(...weights.map(r => r.amount));
+        const range = maxW - minW || 0.5;
+        const minDate = new Date(weights[0].time);
+        const maxDate = new Date(weights[weights.length - 1].time);
+        const dateRange = maxDate - minDate || 1;
+        cvs.strokeStyle = '#6c5ce7'; cvs.lineWidth = 2; cvs.beginPath();
+        weights.forEach((r, i) => {
+          const x = 20 + ((new Date(r.time) - minDate) / dateRange) * (w - 40);
+          const y = h - 20 - ((r.amount - minW) / range) * (h - 40);
+          i === 0 ? cvs.moveTo(x, y) : cvs.lineTo(x, y);
+        });
+        cvs.stroke();
+        cvs.fillStyle = '#6c5ce7';
+        weights.forEach(r => {
+          const x = 20 + ((new Date(r.time) - minDate) / dateRange) * (w - 40);
+          const y = h - 20 - ((r.amount - minW) / range) * (h - 40);
+          cvs.beginPath(); cvs.arc(x, y, 3, 0, Math.PI * 2); cvs.fill();
+        });
+        document.getElementById('chartSummary').textContent = `最新：${weights[weights.length-1].amount}kg | 最高：${maxW}kg | 最低：${minW}kg`;
       }
     }
 
-    // 初始化
-    updateStats();
-    updateBabyHeader();
-    // 首次打开检查宝宝信息
-    if (!getBabyInfo()) {
-      setTimeout(() => showBabyInfoModal(), 500);
+    // ========== 今日详情 ==========
+    async function showTodayDetail(type) {
+      if (records.length === 0) await loadRecords();
+      const todayStart = getStartOfDay(new Date());
+      const todayRecords = records.filter(r => {
+        const t = new Date(r.time);
+        if (t < todayStart) return false;
+        if (type === '大便') return r.type === '大便';
+        if (type === '小便') return r.type === '小便';
+        if (type === '喝奶') return r.type === '喝奶-奶粉' || r.type === '喝奶-母乳' || r.type === '亲喂';
+        return false;
+      }).sort((a, b) => new Date(b.time) - new Date(a.time));
+
+      document.getElementById('todayDetailTitle').textContent = type === '大便' ? '💩 今日大便' : type === '小便' ? '💧 今日小便' : '🍼 今日喂奶';
+      const list = document.getElementById('todayDetailList');
+      if (todayRecords.length === 0) {
+        list.innerHTML = '<div style="text-align:center;color:var(--text-light);padding:20px;">暂无记录</div>';
+      } else {
+        list.innerHTML = todayRecords.map(r => {
+          const map = TYPE_MAP[r.type] || TYPE_MAP['大便'];
+          const extra = r.type === '体重' ? ` ${r.amount}kg` : (r.amount ? ` ${r.amount}ml` : '');
+          return `<div style="display:flex;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);">
+            <span style="font-size:22px;margin-right:10px;">${map.icon}</span>
+            <span style="flex:1;font-size:14px;">${r.type}${extra}</span>
+            <span style="font-size:12px;color:var(--text-light);">${formatFull(r.time)}</span>
+          </div>`;
+        }).join('');
+      }
+      document.getElementById('todayDetailModal').classList.add('show');
     }
+
+    function hideTodayDetailModal(e) { if (e && e.target !== e.currentTarget) return; document.getElementById('todayDetailModal').classList.remove('show'); }
+
+    // ========== 菜单 ==========
+    function showMenu() { document.getElementById('menuModal').classList.add('show'); }
+    function hideMenu(e) { if (e && e.target !== e.currentTarget) return; document.getElementById('menuModal').classList.remove('show'); }
+    function showClearConfirmModal() { document.getElementById('clearConfirmModal').classList.add('show'); }
+    function hideClearConfirmModal(e) { if (e && e.target !== e.currentTarget) return; document.getElementById('clearConfirmModal').classList.remove('show'); }
+
+    async function confirmClearData() {
+      await supabaseDelete('records', `?user_id=eq.${currentUser.id}`);
+      records = [];
+      hideClearConfirmModal();
+      hideMenu();
+      await updateStats();
+      showToast('🗑️ 数据已清空');
+    }
+
+    async function doExport() {
+      await loadRecords();
+      const data = { records, babyInfo: currentUser, exportedAt: new Date().toISOString() };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = `baby-log-${currentUser.name}-${new Date().toISOString().slice(0,10)}.json`; a.click();
+      URL.revokeObjectURL(url);
+      showToast('✅ 已导出');
+    }
+
+    async function doImport(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      try {
+        const text = await file.text();
+        const data = JSON.parse(text);
+        if (!data.records || !Array.isArray(data.records)) throw new Error('无效的文件格式');
+        for (const r of data.records) {
+          r.id = r.id || Date.now().toString() + Math.random().toString(36).slice(2);
+          r.user_id = currentUser.id;
+          delete r.created_at;
+          await supabasePost('records', r);
+        }
+        await loadRecords();
+        await updateStats();
+        showToast(`✅ 已导入 ${data.records.length} 条记录`);
+      } catch (e) { showToast('❌ 导入失败：' + e.message); }
+      event.target.value = '';
+    }
+
+    // ========== 宝宝信息 ==========
+    function showBabyInfoModal() {
+      document.getElementById('babyName').value = currentUser.name || '';
+      document.getElementById('babyBirthday').value = currentUser.birthday || '';
+      selectedGender = currentUser.gender || 'boy';
+      updateGenderUI();
+      document.getElementById('babyInfoModal').classList.add('show');
+    }
+
+    function updateGenderUI() {
+      const boyBtn = document.getElementById('genderBoy');
+      const girlBtn = document.getElementById('genderGirl');
+      if (selectedGender === 'boy') { boyBtn.classList.add('selected'); girlBtn.classList.remove('selected'); }
+      else { girlBtn.classList.add('selected'); boyBtn.classList.remove('selected'); }
+    }
+
+    function selectGender(g) { selectedGender = g; updateGenderUI(); }
+    function hideBabyInfoModal() { document.getElementById('babyInfoModal').classList.remove('show'); }
+
+    async function saveBabyInfo() {
+      const name = document.getElementById('babyName').value.trim();
+      const birthday = document.getElementById('babyBirthday').value;
+      if (!name) { showToast('请输入宝宝名字'); return; }
+      if (!birthday) { showToast('请选择出生日期'); return; }
+      try {
+        await supabaseUpdate('users', { name, birthday, gender: selectedGender }, `?id=eq.${currentUser.id}`);
+        currentUser = { ...currentUser, name, birthday, gender: selectedGender };
+        storeUser(currentUser);
+        hideBabyInfoModal();
+        updateBabyHeader();
+        showToast('✅ 宝宝信息已更新');
+      } catch (e) { showToast('❌ 保存失败'); }
+    }
+
+    // ========== 启动 ==========
+    (async function init() {
+      const user = getStoredUser();
+      if (user && user.id) {
+        currentUser = user;
+        showApp();
+      } else {
+        document.getElementById('authScreen').style.display = 'flex';
+      }
+    })();
   </script>
 </body>
 </html>
