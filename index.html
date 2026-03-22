@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>宝宝成长记录</title>
+  <style>
+    :root {
+      --bg: #f8f9fa;
+      --primary: #6c5ce7;
+      --poop: #e17055;
+      --pee: #74b9ff;
+      --milk: #ffeaa7;
+      --text: #2d3436;
+      --text-light: #636e72;
+      --white: #ffffff;
+      --shadow: 0 2px 12px rgba(0,0,0,0.1);
+      --radius: 16px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding-bottom: 80px;
+    }
+
+    .container {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 20px 16px;
+    }
+
+    /* Header */
+    header {
+      text-align: center;
+      padding: 20px 0;
+    }
+
+    header h1 {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 4px;
+    }
+
+    header .version {
+      font-size: 12px;
+      color: var(--text-light);
+    }
+
+    /* 记录按钮区 */
+    .record-section {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+    }
+
+    .record-section h2 {
+      font-size: 14px;
+      color: var(--text-light);
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    .record-buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+
+    .record-btn {
+      flex: 1;
+      max-width: 110px;
+      height: 100px;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      color: white;
+    }
+
+    .record-btn:active {
+      transform: scale(0.95);
+    }
+
+    .record-btn.poop { background: var(--poop); }
+    .record-btn.pee { background: var(--pee); }
+    .record-btn.milk { background: var(--milk); color: var(--text); }
+
+    .record-btn .icon {
+      font-size: 36px;
+    }
+
+    /* 成功反馈 */
+    .record-btn.success {
+      animation: pulse 0.5s ease;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
+    /* Tab 导航 */
+    .tab-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--white);
+      display: flex;
+      box-shadow: 0 -2px 12px rgba(0,0,0,0.1);
+      z-index: 100;
+    }
+
+    .tab-nav .tab-item {
+      flex: 1;
+      padding: 12px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-light);
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+      background: none;
+    }
+
+    .tab-nav .tab-item.active {
+      color: var(--primary);
+    }
+
+    .tab-nav .tab-item .tab-icon {
+      font-size: 20px;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    /* Tab 内容 */
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* 统计面板 */
+    .stats-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      margin-bottom: 16px;
+    }
+
+    .stats-card h3 {
+      font-size: 14px;
+      color: var(--text-light);
+      margin-bottom: 16px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .stats-item {
+      text-align: center;
+      padding: 16px 8px;
+      border-radius: 12px;
+      background: var(--bg);
+    }
+
+    .stats-item.poop { background: rgba(225,112,85,0.15); }
+    .stats-item.pee { background: rgba(116,185,255,0.15); }
+    .stats-item.milk { background: rgba(255,234,167,0.3); }
+
+    .stats-item .num {
+      font-size: 28px;
+      font-weight: 700;
+    }
+
+    .stats-item.poop .num { color: var(--poop); }
+    .stats-item.pee .num { color: var(--pee); }
+    .stats-item.milk .num { color: #d4a017; }
+
+    .stats-item .label {
+      font-size: 12px;
+      color: var(--text-light);
+      margin-top: 4px;
+    }
+
+    /* 历史记录 */
+    .history-list {
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .history-item {
+      display: flex;
+      align-items: center;
+      padding: 16px;
+      border-bottom: 1px solid var(--bg);
+    }
+
+    .history-item:last-child {
+      border-bottom: none;
+    }
+
+    .history-item .type-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      margin-right: 12px;
+    }
+
+    .history-item.poop .type-icon { background: rgba(225,112,85,0.15); }
+    .history-item.pee .type-icon { background: rgba(116,185,255,0.15); }
+    .history-item.milk .type-icon { background: rgba(255,234,167,0.3); }
+
+    .history-item .info {
+      flex: 1;
+    }
+
+    .history-item .type-name {
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .history-item.poop .type-name { color: var(--poop); }
+    .history-item.pee .type-name { color: var(--pee); }
+    .history-item.milk .type-name { color: #d4a017; }
+
+    .history-item .time {
+      font-size: 13px;
+      color: var(--text-light);
+    }
+
+    .history-empty {
+      text-align: center;
+      padding: 40px;
+      color: var(--text-light);
+    }
+
+    /* Toast 提示 */
+    .toast {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0,0,0,0.75);
+      color: white;
+      padding: 16px 32px;
+      border-radius: 12px;
+      font-size: 16px;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+
+    .toast.show {
+      opacity: 1;
+    }
+
+    /* 加载状态 */
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: var(--text-light);
+    }
+
+    /* 错误提示 */
+    .error-msg {
+      text-align: center;
+      padding: 20px;
+      color: var(--poop);
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>👶 宝宝成长记录</h1>
+      <div class="version">v0.1</div>
+    </header>
+
+    <!-- 快速记录 -->
+    <section class="record-section" id="recordSection">
+      <h2>点击记录</h2>
+      <div class="record-buttons">
+        <button class="record-btn poop" data-type="大便" onclick="record('大便')">
+          <span class="icon">💩</span>
+          <span>大便</span>
+        </button>
+        <button class="record-btn pee" data-type="小便" onclick="record('小便')">
+          <span class="icon">🚼</span>
+          <span>小便</span>
+        </button>
+        <button class="record-btn milk" data-type="喝奶-奶粉" onclick="record('喝奶-奶粉')">
+          <span class="icon">🍼</span>
+          <span>奶粉</span>
+        </button>
+        <button class="record-btn milk" data-type="喝奶-母乳" onclick="record('喝奶-母乳')">
+          <span class="icon">🤱</span>
+          <span>母乳</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- 统计 Tab -->
+    <div class="tab-content" id="statsTab">
+      <div class="stats-card">
+        <h3>今日统计</h3>
+        <div class="stats-grid" id="todayStats">
+          <div class="stats-item poop">
+            <div class="num" id="todayPoop">0</div>
+            <div class="label">大便</div>
+          </div>
+          <div class="stats-item pee">
+            <div class="num" id="todayPee">0</div>
+            <div class="label">小便</div>
+          </div>
+          <div class="stats-item milk">
+            <div class="num" id="todayMilk">0</div>
+            <div class="label">喝奶</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stats-card">
+        <h3>本周统计</h3>
+        <div class="stats-grid" id="weekStats">
+          <div class="stats-item poop">
+            <div class="num" id="weekPoop">0</div>
+            <div class="label">大便</div>
+          </div>
+          <div class="stats-item pee">
+            <div class="num" id="weekPee">0</div>
+            <div class="label">小便</div>
+          </div>
+          <div class="stats-item milk">
+            <div class="num" id="weekMilk">0</div>
+            <div class="label">喝奶</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 历史 Tab -->
+    <div class="tab-content" id="historyTab">
+      <div class="history-list" id="historyList">
+        <div class="loading">加载中...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab 导航 -->
+  <nav class="tab-nav">
+    <button class="tab-item active" data-tab="recordSection">
+      <span class="tab-icon">✏️</span>
+      记录
+    </button>
+    <button class="tab-item" data-tab="statsTab">
+      <span class="tab-icon">📊</span>
+      统计
+    </button>
+    <button class="tab-item" data-tab="historyTab">
+      <span class="tab-icon">📋</span>
+      历史
+    </button>
+  </nav>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ============== 配置区 ==============
+    const CONFIG = {
+      // 飞书 Bitable 配置
+      BITABLE_APP_TOKEN: 'XlOBbGoBga2ArOsgSf1cZlYNnoe',
+      BITABLE_TABLE_ID: 'tblZgtsnqGMBHPIn',
+      BITABLE_APP_ID: 'cli_a93134be0c79dccc',
+      BITABLE_APP_SECRET: 'XGFXmzsW6YGHzSDv0qLRddwcP3KP0slv',
+    };
+
+    // 类型映射
+    const TYPE_MAP = {
+      '大便': { icon: '💩', class: 'poop' },
+      '小便': { icon: '🚼', class: 'pee' },
+      '喝奶-奶粉': { icon: '🍼', class: 'milk' },
+      '喝奶-母乳': { icon: '🤱', class: 'milk' }
+    };
+
+    // ============== 飞书 API ==============
+    let appAccessToken = '';
+
+    // 获取 App Access Token
+    async function getAppAccessToken() {
+      if (appAccessToken) return appAccessToken;
+
+      const res = await fetch('https://open.feishu.cn/open-apis/auth/v3/tenant_access_token/internal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          app_id: CONFIG.BITABLE_APP_ID,
+          app_secret: CONFIG.BITABLE_APP_SECRET
+        })
+      });
+      const data = await res.json();
+      if (data.code === 0) {
+        appAccessToken = data.tenant_access_token;
+        return appAccessToken;
+      }
+      throw new Error('获取 Token 失败: ' + JSON.stringify(data));
+    }
+
+    // 创建记录
+    async function createRecord(type) {
+      await getAppAccessToken();
+
+      // 字段映射：类型 -> 字段名
+      const fieldMap = {
+        '大便': '大便',
+        '小便': '小便',
+        '喝奶-奶粉': '喝奶-奶粉',
+        '喝奶-母乳': '喝奶-母乳'
+      };
+
+      const fields = {};
+      fields[fieldMap[type]] = '1';  // 该类型字段标记为1
+      fields['时间'] = new Date().toISOString();  // 记录时间
+
+      const res = await fetch(`https://open.feishu.cn/open-apis/bitable/v1/apps/${CONFIG.BITABLE_APP_TOKEN}/tables/${CONFIG.BITABLE_TABLE_ID}/records`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + appAccessToken
+        },
+        body: JSON.stringify({ fields })
+      });
+
+      const data = await res.json();
+      if (data.code !== 0) {
+        throw new Error('创建记录失败: ' + JSON.stringify(data));
+      }
+      return data.data.record;
+    }
+
+    // 获取记录列表
+    async function getRecords(limit = 30) {
+      await getAppAccessToken();
+
+      const res = await fetch(
+        `https://open.feishu.cn/open-apis/bitable/v1/apps/${CONFIG.BITABLE_APP_TOKEN}/tables/${CONFIG.BITABLE_TABLE_ID}/records?page_size=${limit}&field_names=大便,小便,喝奶-奶粉,喝奶-母乳,时间`,
+        {
+          headers: { 'Authorization': 'Bearer ' + appAccessToken }
+        }
+      );
+
+      const data = await res.json();
+      if (data.code !== 0) {
+        throw new Error('获取记录失败: ' + JSON.stringify(data));
+      }
+      return data.data.items || [];
+    }
+
+    // ============== 业务逻辑 ==============
+
+    // 显示 Toast
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 1500);
+    }
+
+    // 记录
+    async function record(type) {
+      const btn = document.querySelector(`.record-btn.${TYPE_MAP[type].class}`);
+
+      // 本地反馈
+      btn.classList.add('success');
+      setTimeout(() => btn.classList.remove('success'), 500);
+
+      // 震动反馈
+      if (navigator.vibrate) {
+        navigator.vibrate(50);
+      }
+
+      try {
+        // 检查配置
+        if (!CONFIG.BITABLE_APP_TOKEN || !CONFIG.BITABLE_TABLE_ID) {
+          showToast('⚠️ 请先配置飞书 Bitable');
+          return;
+        }
+
+        await createRecord(type);
+        showToast('✅ 已记录 ' + type);
+
+        // 如果当前在历史页，刷新
+        if (document.getElementById('historyTab').classList.contains('active')) {
+          loadHistory();
+        }
+        // 如果当前在统计页，刷新
+        if (document.getElementById('statsTab').classList.contains('active')) {
+          loadStats();
+        }
+      } catch (e) {
+        console.error(e);
+        showToast('❌ 记录失败: ' + e.message);
+      }
+    }
+
+    // 格式化时间
+    function formatTime(isoString) {
+      const d = new Date(isoString);
+      const month = d.getMonth() + 1;
+      const day = d.getDate();
+      const hour = d.getHours().toString().padStart(2, '0');
+      const min = d.getMinutes().toString().padStart(2, '0');
+      return `${month}月${day}日 ${hour}:${min}`;
+    }
+
+    // 加载历史
+    async function loadHistory() {
+      const list = document.getElementById('historyList');
+
+      if (!CONFIG.BITABLE_APP_TOKEN) {
+        list.innerHTML = '<div class="error-msg">请先配置飞书 Bitable</div>';
+        return;
+      }
+
+      try {
+        const records = await getRecords(30);
+
+        if (records.length === 0) {
+          list.innerHTML = '<div class="history-empty">暂无记录<br>点击上方按钮开始记录</div>';
+          return;
+        }
+
+        // 按时间倒序
+        records.sort((a, b) => new Date(b.fields['时间']) - new Date(a.fields['时间']));
+
+        list.innerHTML = records.map(r => {
+          // 根据哪个字段有值来判断类型
+          let type = '未知';
+          let time = '时间未知';
+          if (r.fields['时间']) time = formatTime(r.fields['时间']);
+          if (r.fields['大便'] === '1') type = '大便';
+          else if (r.fields['小便'] === '1') type = '小便';
+          else if (r.fields['喝奶-奶粉'] === '1') type = '喝奶-奶粉';
+          else if (r.fields['喝奶-母乳'] === '1') type = '喝奶-母乳';
+          const map = TYPE_MAP[type] || TYPE_MAP['大便'];
+          return `
+            <div class="history-item ${map.class}">
+              <div class="type-icon">${map.icon}</div>
+              <div class="info">
+                <div class="type-name">${type}</div>
+                <div class="time">${time}</div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      } catch (e) {
+        console.error(e);
+        list.innerHTML = '<div class="error-msg">加载失败: ' + e.message + '</div>';
+      }
+    }
+
+    // 加载统计
+    async function loadStats() {
+      if (!CONFIG.BITABLE_APP_TOKEN) return;
+
+      try {
+        const records = await getRecords(100);
+        const now = new Date();
+
+        // 今日开始
+        const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+        // 本周开始（周一）
+        const weekStart = new Date(todayStart);
+        weekStart.setDate(weekStart.getDate() - weekStart.getDay() + 1);
+
+        let todayPoop = 0, todayPee = 0, todayMilk = 0;
+        let weekPoop = 0, weekPee = 0, weekMilk = 0;
+
+        records.forEach(r => {
+          const timeStr = r.fields['时间'];
+          if (!timeStr) return;
+          const t = new Date(timeStr);
+          if (isNaN(t.getTime())) return;
+
+          // 根据哪个字段有值来判断类型
+          let type = null;
+          if (r.fields['大便'] === '1') type = '大便';
+          else if (r.fields['小便'] === '1') type = '小便';
+          else if (r.fields['喝奶-奶粉'] === '1' || r.fields['喝奶-母乳'] === '1') type = '喝奶';
+
+          if (t >= todayStart) {
+            if (type === '大便') todayPoop++;
+            else if (type === '小便') todayPee++;
+            else if (type === '喝奶') todayMilk++;
+          }
+
+          if (t >= weekStart) {
+            if (type === '大便') weekPoop++;
+            else if (type === '小便') weekPee++;
+            else if (type === '喝奶') weekMilk++;
+          }
+        });
+
+        document.getElementById('todayPoop').textContent = todayPoop;
+        document.getElementById('todayPee').textContent = todayPee;
+        document.getElementById('todayMilk').textContent = todayMilk;
+
+        document.getElementById('weekPoop').textContent = weekPoop;
+        document.getElementById('weekPee').textContent = weekPee;
+        document.getElementById('weekMilk').textContent = weekMilk;
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    // ============== Tab 切换 ==============
+    document.querySelectorAll('.tab-item').forEach(tab => {
+      tab.addEventListener('click', () => {
+        // 切换 active
+        document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+
+        // 切换内容
+        const tabId = tab.dataset.tab;
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+
+        // 加载数据
+        if (tabId === 'historyTab') {
+          loadHistory();
+        } else if (tabId === 'statsTab') {
+          loadStats();
+        }
+      });
+    });
+
+    // 初始化
+    loadStats();
+  </script>
+</body>
+</html>
