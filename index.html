@@ -516,25 +516,42 @@
   <div class="modal-overlay" id="milkModal" onclick="hideMilkModal(event)">
     <div class="modal" onclick="event.stopPropagation()">
       <div class="modal-title">🍼 记录喂奶</div>
-      <div style="display:flex;gap:10px;margin-bottom:16px;">
+      <div style="margin-bottom: 12px;">
+        <label style="font-size:13px;color:var(--text-light);display:block;margin-bottom:6px;">日期和时间</label>
+        <input type="datetime-local" id="milkDateTime"
+               style="width:100%;padding:12px;border:2px solid var(--border);border-radius:12px;font-size:14px;outline:none;">
+      </div>
+      <div style="display:flex;gap:10px;margin-bottom:12px;">
         <button id="typeFormula" onclick="selectMilkType('formula')" 
-                style="flex:1;padding:14px;border:2px solid var(--border);border-radius:12px;background:white;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all 0.2s;">
+                style="flex:1;padding:12px;border:2px solid var(--border);border-radius:12px;background:white;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">
           <span>🍼</span><span>奶粉</span>
         </button>
         <button id="typeBreast" onclick="selectMilkType('breast')"
-                style="flex:1;padding:14px;border:2px solid var(--border);border-radius:12px;background:white;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all 0.2s;">
+                style="flex:1;padding:12px;border:2px solid var(--border);border-radius:12px;background:white;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">
           <span>🤱</span><span>母乳</span>
         </button>
       </div>
       <div style="margin-bottom: 16px;">
-        <label style="font-size:13px;color:var(--text-light);display:block;margin-bottom:8px;">奶量（ml）</label>
+        <label style="font-size:13px;color:var(--text-light);display:block;margin-bottom:6px;">奶量（ml）</label>
         <input type="number" id="milkAmount" placeholder="例如：120" 
-               style="width:100%;padding:14px;border:2px solid var(--border);border-radius:12px;font-size:16px;outline:none;"
-               onfocus="this.style.borderColor='var(--primary)'"
-               onblur="this.style.borderColor='var(--border)'">
+               style="width:100%;padding:12px;border:2px solid var(--border);border-radius:12px;font-size:14px;outline:none;">
       </div>
       <button class="modal-btn export" onclick="confirmMilk()">确认记录</button>
       <button class="modal-btn cancel" onclick="hideMilkModal()">取消</button>
+    </div>
+  </div>
+
+  <!-- 大便/小便弹窗 -->
+  <div class="modal-overlay" id="poopPeeModal" onclick="hidePoopPeeModal(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-title" id="poopPeeTitle">💩 记录</div>
+      <div style="margin-bottom: 16px;">
+        <label style="font-size:13px;color:var(--text-light);display:block;margin-bottom:6px;">日期和时间</label>
+        <input type="datetime-local" id="poopPeeDateTime"
+               style="width:100%;padding:12px;border:2px solid var(--border);border-radius:12px;font-size:14px;outline:none;">
+      </div>
+      <button class="modal-btn export" onclick="confirmPoopPee()">确认记录</button>
+      <button class="modal-btn cancel" onclick="hidePoopPeeModal()">取消</button>
     </div>
   </div>
 
@@ -551,7 +568,8 @@
     };
 
     let currentFilter = 'today';
-    let selectedMilkType = 'formula'; // 默认奶粉
+    let selectedMilkType = 'formula';
+    let pendingPoopPeeType = null;
 
     // ========== 存储 ==========
     function getRecords() {
@@ -563,9 +581,9 @@
       localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
     }
 
-    function addRecord(type, amount) {
+    function addRecord(type, amount, time) {
       const records = getRecords();
-      records.push({ id: Date.now().toString(), type, time: new Date().toISOString(), amount: amount || null });
+      records.push({ id: Date.now().toString(), type, time: time || new Date().toISOString(), amount: amount || null });
       saveRecords(records);
       return records[records.length - 1];
     }
@@ -585,6 +603,10 @@
       selectedMilkType = 'formula';
       updateMilkTypeUI();
       document.getElementById('milkAmount').value = '';
+      // 默认当前时间
+      const now = new Date();
+      const iso = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+      document.getElementById('milkDateTime').value = iso;
       document.getElementById('milkModal').classList.add('show');
       setTimeout(() => document.getElementById('milkAmount').focus(), 100);
     }
@@ -595,7 +617,6 @@
     }
 
     function updateMilkTypeUI() {
-      const border = '2px solid var(--primary)';
       const normalBorder = '2px solid var(--border)';
       const formulaBtn = document.getElementById('typeFormula');
       const breastBtn = document.getElementById('typeBreast');
@@ -623,12 +644,40 @@
         showToast('请输入奶量');
         return;
       }
+      const datetimeInput = document.getElementById('milkDateTime').value;
+      const time = datetimeInput ? new Date(datetimeInput).toISOString() : new Date().toISOString();
       const type = selectedMilkType === 'formula' ? '喝奶-奶粉' : '喝奶-母乳';
       if (navigator.vibrate) navigator.vibrate(50);
-      addRecord(type, parseInt(amount));
+      addRecord(type, parseInt(amount), time);
       hideMilkModal();
       const icon = type === '喝奶-奶粉' ? '🍼' : '🤱';
       showToast(`${icon} 已记录 ${amount}ml`);
+      updateStats();
+    }
+
+    // 大便/小便弹窗
+    function showPoopPeeModal(type) {
+      pendingPoopPeeType = type;
+      document.getElementById('poopPeeTitle').textContent = type === '大便' ? '💩 记录大便' : '🚼 记录小便';
+      const now = new Date();
+      const iso = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+      document.getElementById('poopPeeDateTime').value = iso;
+      document.getElementById('poopPeeModal').classList.add('show');
+    }
+
+    function hidePoopPeeModal(e) {
+      if (e && e.target !== e.currentTarget) return;
+      document.getElementById('poopPeeModal').classList.remove('show');
+    }
+
+    function confirmPoopPee() {
+      const datetimeInput = document.getElementById('poopPeeDateTime').value;
+      const time = datetimeInput ? new Date(datetimeInput).toISOString() : new Date().toISOString();
+      if (navigator.vibrate) navigator.vibrate(50);
+      addRecord(pendingPoopPeeType, null, time);
+      hidePoopPeeModal();
+      const icon = pendingPoopPeeType === '大便' ? '💩' : '🚼';
+      showToast(`${icon} 已记录`);
       updateStats();
     }
 
@@ -679,15 +728,18 @@
 
     // ========== 记录 ==========
     function record(type) {
+      // 大便小便弹出时间选择
+      if (type === '大便' || type === '小便') {
+        showPoopPeeModal(type);
+        return;
+      }
+      // 喂奶走另一个弹窗
+      if (type === '喂奶') {
+        showFeedMilkModal();
+        return;
+      }
       if (navigator.vibrate) navigator.vibrate(50);
       addRecord(type);
-      const btns = document.querySelectorAll('.record-btn');
-      btns.forEach(btn => {
-        if (btn.textContent.includes(type.replace('喝奶-', ''))) {
-          btn.style.transform = 'scale(1.1)';
-          setTimeout(() => btn.style.transform = '', 200);
-        }
-      });
       const icon = type === '大便' ? '💩' : '🚼';
       showToast(`${icon} 已记录`);
       updateStats();
