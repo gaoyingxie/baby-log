@@ -429,13 +429,9 @@
             <span class="icon">🚼</span>
             <span class="label">小便</span>
           </button>
-          <button class="record-btn milk" onclick="showMilkInput('喝奶-奶粉')">
+          <button class="record-btn milk" onclick="showFeedMilkModal()" style="grid-column: span 2;">
             <span class="icon">🍼</span>
-            <span class="label">奶粉</span>
-          </button>
-          <button class="record-btn breast" onclick="showMilkInput('喝奶-母乳')">
-            <span class="icon">🤱</span>
-            <span class="label">母乳</span>
+            <span class="label">喂奶</span>
           </button>
         </div>
       </div>
@@ -522,12 +518,22 @@
     </div>
   </div>
 
-  <!-- 喝奶输入弹窗 -->
+  <!-- 喂奶弹窗 -->
   <div class="modal-overlay" id="milkModal" onclick="hideMilkModal(event)">
     <div class="modal" onclick="event.stopPropagation()">
-      <div class="modal-title" id="milkModalTitle">🍼 记录喝奶</div>
+      <div class="modal-title">🍼 记录喂奶</div>
+      <div style="display:flex;gap:10px;margin-bottom:16px;">
+        <button id="typeFormula" onclick="selectMilkType('formula')" 
+                style="flex:1;padding:14px;border:2px solid var(--border);border-radius:12px;background:white;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all 0.2s;">
+          <span>🍼</span><span>奶粉</span>
+        </button>
+        <button id="typeBreast" onclick="selectMilkType('breast')"
+                style="flex:1;padding:14px;border:2px solid var(--border);border-radius:12px;background:white;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all 0.2s;">
+          <span>🤱</span><span>母乳</span>
+        </button>
+      </div>
       <div style="margin-bottom: 16px;">
-        <label style="font-size:13px;color:var(--text-light);display:block;margin-bottom:8px;">请输入奶量（ml）</label>
+        <label style="font-size:13px;color:var(--text-light);display:block;margin-bottom:8px;">奶量（ml）</label>
         <input type="number" id="milkAmount" placeholder="例如：120" 
                style="width:100%;padding:14px;border:2px solid var(--border);border-radius:12px;font-size:16px;outline:none;"
                onfocus="this.style.borderColor='var(--primary)'"
@@ -551,7 +557,7 @@
     };
 
     let currentFilter = 'today';
-    let pendingMilkType = null;
+    let selectedMilkType = 'formula'; // 默认奶粉
 
     // ========== 存储 ==========
     function getRecords() {
@@ -581,29 +587,49 @@
     function showMenu() { document.getElementById('menuModal').classList.add('show'); }
     function hideMenu(e) { if (e && e.target !== e.currentTarget) return; document.getElementById('menuModal').classList.remove('show'); }
 
-    function showMilkInput(type) {
-      pendingMilkType = type;
-      const isFormula = type === '喝奶-奶粉';
-      document.getElementById('milkModalTitle').textContent = isFormula ? '🍼 记录奶粉' : '🤱 记录母乳';
-      document.getElementById('milkAmount').placeholder = isFormula ? '例如：120' : '母乳请填 1';
+    function showFeedMilkModal() {
+      selectedMilkType = 'formula';
+      updateMilkTypeUI();
       document.getElementById('milkAmount').value = '';
       document.getElementById('milkModal').classList.add('show');
       setTimeout(() => document.getElementById('milkAmount').focus(), 100);
     }
 
+    function selectMilkType(type) {
+      selectedMilkType = type;
+      updateMilkTypeUI();
+    }
+
+    function updateMilkTypeUI() {
+      const border = '2px solid var(--primary)';
+      const normalBorder = '2px solid var(--border)';
+      const formulaBtn = document.getElementById('typeFormula');
+      const breastBtn = document.getElementById('typeBreast');
+      if (selectedMilkType === 'formula') {
+        formulaBtn.style.borderColor = 'var(--milk)';
+        formulaBtn.style.background = 'var(--milk-bg)';
+        breastBtn.style.borderColor = normalBorder;
+        breastBtn.style.background = 'white';
+      } else {
+        breastBtn.style.borderColor = 'var(--breast)';
+        breastBtn.style.background = 'var(--breast-bg)';
+        formulaBtn.style.borderColor = normalBorder;
+        formulaBtn.style.background = 'white';
+      }
+    }
+
     function hideMilkModal(e) {
       if (e && e.target !== e.currentTarget) return;
       document.getElementById('milkModal').classList.remove('show');
-      pendingMilkType = null;
     }
 
     function confirmMilk() {
       const amount = document.getElementById('milkAmount').value;
       if (!amount || parseInt(amount) <= 0) {
-        showToast('请输入正确的量');
+        showToast('请输入奶量');
         return;
       }
-      const type = pendingMilkType;
+      const type = selectedMilkType === 'formula' ? '喝奶-奶粉' : '喝奶-母乳';
       if (navigator.vibrate) navigator.vibrate(50);
       addRecord(type, parseInt(amount));
       hideMilkModal();
