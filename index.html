@@ -6,268 +6,213 @@
   <title>宝宝成长记录</title>
   <style>
     :root {
-      --bg: #f8f9fa;
+      --bg: #f5f6fa;
+      --card: #ffffff;
       --primary: #6c5ce7;
+      --primary-light: rgba(108,92,231,0.1);
       --poop: #e17055;
+      --poop-bg: rgba(225,112,85,0.12);
       --pee: #74b9ff;
-      --milk: #ffeaa7;
+      --pee-bg: rgba(116,185,255,0.12);
+      --milk: #fdcb6e;
+      --milk-bg: rgba(253,203,110,0.2);
       --text: #2d3436;
       --text-light: #636e72;
-      --white: #ffffff;
-      --shadow: 0 2px 12px rgba(0,0,0,0.1);
-      --radius: 16px;
+      --border: #dfe6e9;
+      --shadow: 0 2px 12px rgba(0,0,0,0.08);
+      --radius: 20px;
+      --radius-sm: 14px;
     }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
-      padding-bottom: 80px;
+      padding-bottom: env(safe-area-inset-bottom, 20px);
     }
 
-    .container {
-      max-width: 480px;
-      margin: 0 auto;
-      padding: 20px 16px;
-    }
+    .container { max-width: 480px; margin: 0 auto; padding: 0 16px 100px; }
 
     /* Header */
     header {
-      text-align: center;
-      padding: 20px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 0 16px;
+      position: sticky;
+      top: 0;
+      background: var(--bg);
+      z-index: 10;
     }
 
     header h1 {
-      font-size: 24px;
+      font-size: 22px;
       font-weight: 700;
       color: var(--primary);
-      margin-bottom: 4px;
-    }
-
-    header .version {
-      font-size: 12px;
-      color: var(--text-light);
-    }
-
-    /* 记录按钮区 */
-    .record-section {
-      background: var(--white);
-      border-radius: var(--radius);
-      padding: 24px;
-      box-shadow: var(--shadow);
-      margin-bottom: 20px;
-    }
-
-    .record-section h2 {
-      font-size: 14px;
-      color: var(--text-light);
-      margin-bottom: 16px;
-      text-align: center;
-    }
-
-    .record-buttons {
       display: flex;
-      gap: 12px;
+      align-items: center;
+      gap: 8px;
+    }
+
+    header h1 span { font-size: 26px; }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .icon-btn {
+      width: 40px;
+      height: 40px;
+      border: none;
+      border-radius: 50%;
+      background: var(--card);
+      box-shadow: var(--shadow);
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
       justify-content: center;
+      transition: transform 0.2s;
+    }
+
+    .icon-btn:active { transform: scale(0.92); }
+
+    /* Card */
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .card-title {
+      font-size: 13px;
+      color: var(--text-light);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Record Buttons */
+    .record-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
     }
 
     .record-btn {
-      flex: 1;
-      max-width: 110px;
-      height: 100px;
+      height: 90px;
       border: none;
-      border-radius: var(--radius);
-      font-size: 14px;
+      border-radius: var(--radius-sm);
+      font-size: 15px;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.2s;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: 6px;
+      transition: all 0.2s;
       color: white;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .record-btn::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 50%);
     }
 
     .record-btn:active {
-      transform: scale(0.95);
+      transform: scale(0.96);
     }
 
-    .record-btn.poop { background: var(--poop); }
-    .record-btn.pee { background: var(--pee); }
-    .record-btn.milk { background: var(--milk); color: var(--text); }
+    .record-btn .icon { font-size: 36px; position: relative; z-index: 1; }
+    .record-btn .label { position: relative; z-index: 1; }
 
-    .record-btn .icon {
-      font-size: 36px;
-    }
+    .record-btn.poop { background: linear-gradient(145deg, var(--poop), #d63031); }
+    .record-btn.pee { background: linear-gradient(145deg, var(--pee), #0984e3); }
+    .record-btn.milk { background: linear-gradient(145deg, var(--milk), #f9a825); color: #5d4e1a; }
+    .record-btn.breast { background: linear-gradient(145deg, #fd79a8, #e84393); }
 
-    /* 成功反馈 */
-    .record-btn.success {
-      animation: pulse 0.5s ease;
-    }
-
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.1); }
-    }
-
-    /* Tab 导航 */
-    .tab-nav {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: var(--white);
+    /* Stats */
+    .stats-row {
       display: flex;
-      box-shadow: 0 -2px 12px rgba(0,0,0,0.1);
-      z-index: 100;
+      gap: 10px;
     }
 
-    .tab-nav .tab-item {
+    .stat-item {
       flex: 1;
-      padding: 12px;
       text-align: center;
-      font-size: 12px;
-      color: var(--text-light);
-      cursor: pointer;
-      transition: all 0.2s;
-      border: none;
-      background: none;
-    }
-
-    .tab-nav .tab-item.active {
-      color: var(--primary);
-    }
-
-    .tab-nav .tab-item .tab-icon {
-      font-size: 20px;
-      display: block;
-      margin-bottom: 4px;
-    }
-
-    /* Tab 内容 */
-    .tab-content {
-      display: none;
-    }
-
-    .tab-content.active {
-      display: block;
-    }
-
-    /* 统计面板 */
-    .stats-card {
-      background: var(--white);
-      border-radius: var(--radius);
-      padding: 20px;
-      box-shadow: var(--shadow);
-      margin-bottom: 16px;
-    }
-
-    .stats-card h3 {
-      font-size: 14px;
-      color: var(--text-light);
-      margin-bottom: 16px;
-    }
-
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-    }
-
-    .stats-item {
-      text-align: center;
-      padding: 16px 8px;
-      border-radius: 12px;
+      padding: 14px 8px;
+      border-radius: var(--radius-sm);
       background: var(--bg);
     }
 
-    .stats-item.poop { background: rgba(225,112,85,0.15); }
-    .stats-item.pee { background: rgba(116,185,255,0.15); }
-    .stats-item.milk { background: rgba(255,234,167,0.3); }
+    .stat-item .icon { font-size: 22px; margin-bottom: 4px; }
+    .stat-item .num { font-size: 28px; font-weight: 700; }
+    .stat-item .label { font-size: 11px; color: var(--text-light); margin-top: 2px; }
 
-    .stats-item .num {
-      font-size: 28px;
-      font-weight: 700;
-    }
+    .stat-item.poop .num { color: var(--poop); }
+    .stat-item.pee .num { color: var(--pee); }
+    .stat-item.milk .num { color: #d4a017; }
 
-    .stats-item.poop .num { color: var(--poop); }
-    .stats-item.pee .num { color: var(--pee); }
-    .stats-item.milk .num { color: #d4a017; }
-
-    .stats-item .label {
-      font-size: 12px;
-      color: var(--text-light);
-      margin-top: 4px;
-    }
-
-    /* 历史记录 */
-    .history-list {
-      background: var(--white);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      overflow: hidden;
-    }
+    /* History */
+    .history-list { display: flex; flex-direction: column; }
 
     .history-item {
       display: flex;
       align-items: center;
-      padding: 16px;
-      border-bottom: 1px solid var(--bg);
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border);
     }
 
-    .history-item:last-child {
-      border-bottom: none;
+    .history-item:last-child { border-bottom: none; }
+
+    .history-item .time {
+      font-size: 12px;
+      color: var(--text-light);
+      width: 55px;
+      flex-shrink: 0;
     }
 
     .history-item .type-icon {
-      width: 44px;
-      height: 44px;
-      border-radius: 12px;
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 24px;
+      font-size: 20px;
       margin-right: 12px;
+      flex-shrink: 0;
     }
 
-    .history-item.poop .type-icon { background: rgba(225,112,85,0.15); }
-    .history-item.pee .type-icon { background: rgba(116,185,255,0.15); }
-    .history-item.milk .type-icon { background: rgba(255,234,167,0.3); }
+    .history-item.poop .type-icon { background: var(--poop-bg); }
+    .history-item.pee .type-icon { background: var(--pee-bg); }
+    .history-item.milk .type-icon { background: var(--milk-bg); }
 
-    .history-item .info {
-      flex: 1;
-    }
-
-    .history-item .type-name {
-      font-weight: 600;
-      margin-bottom: 4px;
-    }
-
+    .history-item .type-name { font-weight: 600; font-size: 14px; }
     .history-item.poop .type-name { color: var(--poop); }
-    .history-item.pee .type-name { color: var(--pee); }
+    .history-item.pee .type-name { color: #0984e3; }
     .history-item.milk .type-name { color: #d4a017; }
-
-    .history-item .time {
-      font-size: 13px;
-      color: var(--text-light);
-    }
 
     .history-empty {
       text-align: center;
-      padding: 40px;
+      padding: 30px;
       color: var(--text-light);
+      font-size: 14px;
     }
 
-    /* Toast 提示 */
+    /* Toast */
     .toast {
       position: fixed;
       top: 50%;
@@ -275,155 +220,173 @@
       transform: translate(-50%, -50%);
       background: rgba(0,0,0,0.75);
       color: white;
-      padding: 16px 32px;
+      padding: 14px 28px;
       border-radius: 12px;
-      font-size: 16px;
+      font-size: 15px;
       z-index: 1000;
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.3s;
     }
 
-    .toast.show {
+    .toast.show { opacity: 1; }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 100;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+
+    .modal-overlay.show {
       opacity: 1;
+      pointer-events: auto;
     }
 
-    /* 加载状态 */
-    .loading {
+    .modal {
+      background: var(--card);
+      border-radius: 24px 24px 0 0;
+      padding: 24px;
+      width: 100%;
+      max-width: 480px;
+      transform: translateY(100%);
+      transition: transform 0.3s;
+    }
+
+    .modal-overlay.show .modal { transform: translateY(0); }
+
+    .modal-title {
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 16px;
       text-align: center;
-      padding: 40px;
+    }
+
+    .modal-btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .modal-btn.export { background: var(--primary); color: white; }
+    .modal-btn.import { background: var(--primary-light); color: var(--primary); }
+    .modal-btn.cancel { background: var(--bg); color: var(--text-light); margin-top: 6px; }
+
+    .modal-btn:active { transform: scale(0.98); }
+
+    #importFile { display: none; }
+
+    /* Version */
+    .version {
+      text-align: center;
+      font-size: 11px;
       color: var(--text-light);
-    }
-
-    /* 错误提示 */
-    .error-msg {
-      text-align: center;
-      padding: 20px;
-      color: var(--poop);
-      font-size: 14px;
+      padding: 10px 0;
     }
   </style>
 </head>
 <body>
   <div class="container">
     <header>
-      <h1>👶 宝宝成长记录</h1>
-      <div class="version">v0.1</div>
+      <h1><span>👶</span> 宝宝成长记录</h1>
+      <div class="header-actions">
+        <button class="icon-btn" onclick="showMenu()" title="更多">⚙️</button>
+      </div>
     </header>
 
     <!-- 快速记录 -->
-    <section class="record-section" id="recordSection">
-      <h2>点击记录</h2>
-      <div class="record-buttons">
-        <button class="record-btn poop" data-type="大便" onclick="record('大便')">
+    <div class="card">
+      <div class="card-title">✨ 点击记录</div>
+      <div class="record-grid">
+        <button class="record-btn poop" onclick="record('大便')">
           <span class="icon">💩</span>
-          <span>大便</span>
+          <span class="label">大便</span>
         </button>
-        <button class="record-btn pee" data-type="小便" onclick="record('小便')">
+        <button class="record-btn pee" onclick="record('小便')">
           <span class="icon">🚼</span>
-          <span>小便</span>
+          <span class="label">小便</span>
         </button>
-        <button class="record-btn milk" data-type="喝奶-奶粉" onclick="record('喝奶-奶粉')">
+        <button class="record-btn milk" onclick="record('喝奶-奶粉')">
           <span class="icon">🍼</span>
-          <span>奶粉</span>
+          <span class="label">奶粉</span>
         </button>
-        <button class="record-btn milk" data-type="喝奶-母乳" onclick="record('喝奶-母乳')">
+        <button class="record-btn breast" onclick="record('喝奶-母乳')">
           <span class="icon">🤱</span>
-          <span>母乳</span>
+          <span class="label">母乳</span>
         </button>
       </div>
-    </section>
+    </div>
 
-    <!-- 统计 Tab -->
-    <div class="tab-content" id="statsTab">
-      <div class="stats-card">
-        <h3>今日统计</h3>
-        <div class="stats-grid" id="todayStats">
-          <div class="stats-item poop">
-            <div class="num" id="todayPoop">0</div>
-            <div class="label">大便</div>
-          </div>
-          <div class="stats-item pee">
-            <div class="num" id="todayPee">0</div>
-            <div class="label">小便</div>
-          </div>
-          <div class="stats-item milk">
-            <div class="num" id="todayMilk">0</div>
-            <div class="label">喝奶</div>
-          </div>
+    <!-- 今日统计 -->
+    <div class="card">
+      <div class="card-title">📊 今日统计</div>
+      <div class="stats-row">
+        <div class="stat-item poop">
+          <div class="icon">💩</div>
+          <div class="num" id="todayPoop">0</div>
+          <div class="label">大便</div>
         </div>
-      </div>
-
-      <div class="stats-card">
-        <h3>本周统计</h3>
-        <div class="stats-grid" id="weekStats">
-          <div class="stats-item poop">
-            <div class="num" id="weekPoop">0</div>
-            <div class="label">大便</div>
-          </div>
-          <div class="stats-item pee">
-            <div class="num" id="weekPee">0</div>
-            <div class="label">小便</div>
-          </div>
-          <div class="stats-item milk">
-            <div class="num" id="weekMilk">0</div>
-            <div class="label">喝奶</div>
-          </div>
+        <div class="stat-item pee">
+          <div class="icon">🚼</div>
+          <div class="num" id="todayPee">0</div>
+          <div class="label">小便</div>
+        </div>
+        <div class="stat-item milk">
+          <div class="icon">🍼</div>
+          <div class="num" id="todayMilk">0</div>
+          <div class="label">喝奶</div>
         </div>
       </div>
     </div>
 
-    <!-- 历史 Tab -->
-    <div class="tab-content" id="historyTab">
-      <!-- 导出导入按钮 -->
-      <div style="padding: 12px 0; display: flex; gap: 8px;">
-        <button onclick="exportData()" style="flex:1; padding: 10px; border: none; border-radius: 10px; background: #6c5ce7; color: white; font-size: 14px; cursor: pointer;">📤 导出备份</button>
-        <button onclick="document.getElementById('importFile').click()" style="flex:1; padding: 10px; border: none; border-radius: 10px; background: #74b9ff; color: white; font-size: 14px; cursor: pointer;">📥 导入备份</button>
-        <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(this.files[0])">
-      </div>
+    <!-- 最近记录 -->
+    <div class="card">
+      <div class="card-title">📋 最近记录</div>
       <div class="history-list" id="historyList">
-        <div class="loading">加载中...</div>
+        <div class="history-empty">暂无记录<br>点击上方按钮开始记录</div>
       </div>
     </div>
+
+    <div class="version">v0.2</div>
   </div>
 
-  <!-- Tab 导航 -->
-  <nav class="tab-nav">
-    <button class="tab-item active" data-tab="recordSection">
-      <span class="tab-icon">✏️</span>
-      记录
-    </button>
-    <button class="tab-item" data-tab="statsTab">
-      <span class="tab-icon">📊</span>
-      统计
-    </button>
-    <button class="tab-item" data-tab="historyTab">
-      <span class="tab-icon">📋</span>
-      历史
-    </button>
-  </nav>
+  <!-- 设置菜单 -->
+  <div class="modal-overlay" id="menuModal" onclick="hideMenu(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-title">更多操作</div>
+      <button class="modal-btn export" onclick="exportData()">
+        📤 导出备份
+      </button>
+      <button class="modal-btn import" onclick="document.getElementById('importFile').click()">
+        📥 导入备份
+      </button>
+      <input type="file" id="importFile" accept=".json" onchange="importData(this.files[0])">
+      <button class="modal-btn cancel" onclick="hideMenu()">取消</button>
+    </div>
+  </div>
 
   <!-- Toast -->
   <div class="toast" id="toast"></div>
 
   <script>
-    // ============== 配置区 ==============
-    const CONFIG = {
-      // 存储模式: 'local' = localStorage, 'feishu' = 飞书Bitable
-      STORAGE_MODE: 'local',
-      // 代理地址（解决CORS用）
-      PROXY_BASE: 'https://gaoyingxie-baby.loca.lt/proxy',
-      // 飞书 Bitable 配置
-      BITABLE_APP_TOKEN: 'XlOBbGoBga2ArOsgSf1cZlYNnoe',
-      BITABLE_TABLE_ID: 'tblZgtsnqGMBHPIn',
-      BITABLE_APP_ID: 'cli_a93134be0c79dccc',
-      BITABLE_APP_SECRET: 'XGFXmzsW6YGHzSDv0qLRddwcP3KP0slv',
-    };
-
-    // localStorage key
+    // ============== 配置 ==============
     const STORAGE_KEY = 'baby_log_records';
-
-    // 类型映射
     const TYPE_MAP = {
       '大便': { icon: '💩', class: 'poop' },
       '小便': { icon: '🚼', class: 'pee' },
@@ -431,118 +394,28 @@
       '喝奶-母乳': { icon: '🤱', class: 'milk' }
     };
 
-    // ============== 存储模块 ==============
-    
-    // localStorage 模式
-    function getLocalRecords() {
+    // ============== 存储 ==============
+    function getRecords() {
       const data = localStorage.getItem(STORAGE_KEY);
       return data ? JSON.parse(data) : [];
     }
 
-    function saveLocalRecords(records) {
+    function saveRecords(records) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
     }
 
-    function addLocalRecord(type) {
-      const records = getLocalRecords();
+    function addRecord(type) {
+      const records = getRecords();
       records.push({
         id: Date.now().toString(),
         type: type,
         time: new Date().toISOString()
       });
-      saveLocalRecords(records);
+      saveRecords(records);
       return records[records.length - 1];
     }
 
-    // 飞书 API 模式
-    let appAccessToken = '';
-
-    async function getAppAccessToken() {
-      if (appAccessToken) return appAccessToken;
-
-      const res = await fetch(CONFIG.PROXY_BASE + '/auth/v3/tenant_access_token/internal', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          app_id: CONFIG.BITABLE_APP_ID,
-          app_secret: CONFIG.BITABLE_APP_SECRET
-        })
-      });
-      const data = await res.json();
-      if (data.code === 0) {
-        appAccessToken = data.tenant_access_token;
-        return appAccessToken;
-      }
-      throw new Error('获取 Token 失败: ' + JSON.stringify(data));
-    }
-
-    async function createFeishuRecord(type) {
-      await getAppAccessToken();
-
-      const fieldMap = {
-        '大便': '大便',
-        '小便': '小便',
-        '喝奶-奶粉': '喝奶-奶粉',
-        '喝奶-母乳': '喝奶-母乳'
-      };
-
-      const fields = {};
-      fields[fieldMap[type]] = '1';
-      fields['时间'] = new Date().toISOString();
-
-      const res = await fetch(CONFIG.PROXY_BASE + `/bitable/v1/apps/${CONFIG.BITABLE_APP_TOKEN}/tables/${CONFIG.BITABLE_TABLE_ID}/records`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + appAccessToken
-        },
-        body: JSON.stringify({ fields })
-      });
-
-      const data = await res.json();
-      if (data.code !== 0) {
-        throw new Error('创建记录失败: ' + JSON.stringify(data));
-      }
-      return data.data.record;
-    }
-
-    async function getFeishuRecords(limit = 30) {
-      await getAppAccessToken();
-
-      const res = await fetch(
-        CONFIG.PROXY_BASE + `/bitable/v1/apps/${CONFIG.BITABLE_APP_TOKEN}/tables/${CONFIG.BITABLE_TABLE_ID}/records?page_size=${limit}&field_names=大便,小便,喝奶-奶粉,喝奶-母乳,时间`,
-        {
-          headers: { 'Authorization': 'Bearer ' + appAccessToken }
-        }
-      );
-
-      const data = await res.json();
-      if (data.code !== 0) {
-        throw new Error('获取记录失败: ' + JSON.stringify(data));
-      }
-      return data.data.items || [];
-    }
-
-    // 统一接口
-    async function createRecord(type) {
-      if (CONFIG.STORAGE_MODE === 'feishu') {
-        return await createFeishuRecord(type);
-      } else {
-        return addLocalRecord(type);
-      }
-    }
-
-    async function getRecords(limit = 30) {
-      if (CONFIG.STORAGE_MODE === 'feishu') {
-        return await getFeishuRecords(limit);
-      } else {
-        return getLocalRecords();
-      }
-    }
-
-    // ============== 业务逻辑 ==============
-
-    // 显示 Toast
+    // ============== UI ==============
     function showToast(msg) {
       const toast = document.getElementById('toast');
       toast.textContent = msg;
@@ -550,193 +423,105 @@
       setTimeout(() => toast.classList.remove('show'), 1500);
     }
 
-    // 记录
-    async function record(type) {
-      const btn = document.querySelector(`.record-btn.${TYPE_MAP[type].class}`);
-
-      // 本地反馈
-      btn.classList.add('success');
-      setTimeout(() => btn.classList.remove('success'), 500);
-
-      // 震动反馈
-      if (navigator.vibrate) {
-        navigator.vibrate(50);
-      }
-
-      try {
-        // 检查配置
-        if (!CONFIG.BITABLE_APP_TOKEN || !CONFIG.BITABLE_TABLE_ID) {
-          showToast('⚠️ 请先配置飞书 Bitable');
-          return;
-        }
-
-        await createRecord(type);
-        showToast('✅ 已记录 ' + type);
-
-        // 如果当前在历史页，刷新
-        if (document.getElementById('historyTab').classList.contains('active')) {
-          loadHistory();
-        }
-        // 如果当前在统计页，刷新
-        if (document.getElementById('statsTab').classList.contains('active')) {
-          loadStats();
-        }
-      } catch (e) {
-        console.error(e);
-        showToast('❌ 记录失败: ' + e.message);
-      }
+    function showMenu() {
+      document.getElementById('menuModal').classList.add('show');
     }
 
-    // 格式化时间
-    function formatTime(isoString) {
-      const d = new Date(isoString);
-      const month = d.getMonth() + 1;
+    function hideMenu(e) {
+      if (e && e.target !== e.currentTarget) return;
+      document.getElementById('menuModal').classList.remove('show');
+    }
+
+    function formatTime(iso) {
+      const d = new Date(iso);
+      const h = d.getHours().toString().padStart(2, '0');
+      const m = d.getMinutes().toString().padStart(2, '0');
+      return `${h}:${m}`;
+    }
+
+    function formatDate(iso) {
+      const d = new Date(iso);
+      const mon = d.getMonth() + 1;
       const day = d.getDate();
-      const hour = d.getHours().toString().padStart(2, '0');
-      const min = d.getMinutes().toString().padStart(2, '0');
-      return `${month}月${day}日 ${hour}:${min}`;
+      return `${mon}月${day}日`;
     }
 
-    // 加载历史
-    async function loadHistory() {
-      const list = document.getElementById('historyList');
+    // ============== 记录 ==============
+    function record(type) {
+      // 震动
+      if (navigator.vibrate) navigator.vibrate(50);
 
-      try {
-        const records = await getRecords(30);
+      // 添加记录
+      addRecord(type);
 
-        if (records.length === 0) {
-          list.innerHTML = '<div class="history-empty">暂无记录<br>点击上方按钮开始记录</div>';
-          return;
-        }
-
-        // 按时间倒序（兼容 localStorage 和飞书格式）
-        records.sort((a, b) => {
-          const timeA = a.fields ? a.fields['时间'] : a.time;
-          const timeB = b.fields ? b.fields['时间'] : b.time;
-          return new Date(timeB) - new Date(timeA);
-        });
-
-        list.innerHTML = records.map(r => {
-          // localStorage 格式: {id, type, time}
-          // 飞书格式: {fields: {...}}
-          let type, time;
-          if (r.fields) {
-            // 飞书格式
-            if (r.fields['大便'] === '1') type = '大便';
-            else if (r.fields['小便'] === '1') type = '小便';
-            else if (r.fields['喝奶-奶粉'] === '1') type = '喝奶-奶粉';
-            else if (r.fields['喝奶-母乳'] === '1') type = '喝奶-母乳';
-            else type = '未知';
-            time = r.fields['时间'] ? formatTime(r.fields['时间']) : '时间未知';
-          } else {
-            // localStorage 格式
-            type = r.type || '未知';
-            time = r.time ? formatTime(r.time) : '时间未知';
-          }
-          const map = TYPE_MAP[type] || TYPE_MAP['大便'];
-          return `
-            <div class="history-item ${map.class}">
-              <div class="type-icon">${map.icon}</div>
-              <div class="info">
-                <div class="type-name">${type}</div>
-                <div class="time">${time}</div>
-              </div>
-            </div>
-          `;
-        }).join('');
-      } catch (e) {
-        console.error(e);
-        list.innerHTML = '<div class="error-msg">加载失败: ' + e.message + '</div>';
-      }
-    }
-
-    // 加载统计
-    async function loadStats() {
-      try {
-        const records = await getRecords(100);
-        const now = new Date();
-
-        // 今日开始
-        const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
-        // 本周开始（周一）
-        const weekStart = new Date(todayStart);
-        weekStart.setDate(weekStart.getDate() - weekStart.getDay() + 1);
-
-        let todayPoop = 0, todayPee = 0, todayMilk = 0;
-        let weekPoop = 0, weekPee = 0, weekMilk = 0;
-
-        records.forEach(r => {
-          // localStorage: {id, type, time}
-          // 飞书: {fields: {...}}
-          let timeStr, type;
-          if (r.fields) {
-            timeStr = r.fields['时间'];
-            if (r.fields['大便'] === '1') type = '大便';
-            else if (r.fields['小便'] === '1') type = '小便';
-            else if (r.fields['喝奶-奶粉'] === '1' || r.fields['喝奶-母乳'] === '1') type = '喝奶';
-            else return;
-          } else {
-            timeStr = r.time;
-            type = r.type;
-          }
-
-          if (!timeStr) return;
-          const t = new Date(timeStr);
-          if (isNaN(t.getTime())) return;
-
-          if (t >= todayStart) {
-            if (type === '大便') todayPoop++;
-            else if (type === '小便') todayPee++;
-            else if (type === '喝奶' || type === '喝奶-奶粉' || type === '喝奶-母乳') todayMilk++;
-          }
-
-          if (t >= weekStart) {
-            if (type === '大便') weekPoop++;
-            else if (type === '小便') weekPee++;
-            else if (type === '喝奶' || type === '喝奶-奶粉' || type === '喝奶-母乳') weekMilk++;
-          }
-        });
-
-        document.getElementById('todayPoop').textContent = todayPoop;
-        document.getElementById('todayPee').textContent = todayPee;
-        document.getElementById('todayMilk').textContent = todayMilk;
-
-        document.getElementById('weekPoop').textContent = weekPoop;
-        document.getElementById('weekPee').textContent = weekPee;
-        document.getElementById('weekMilk').textContent = weekMilk;
-      } catch (e) {
-        console.error(e);
-      }
-    }
-
-    // ============== Tab 切换 ==============
-    document.querySelectorAll('.tab-item').forEach(tab => {
-      tab.addEventListener('click', () => {
-        // 切换 active
-        document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-
-        // 切换内容
-        const tabId = tab.dataset.tab;
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-        document.getElementById(tabId).classList.add('active');
-
-        // 加载数据
-        if (tabId === 'historyTab') {
-          loadHistory();
-        } else if (tabId === 'statsTab') {
-          loadStats();
+      // 动画反馈
+      const btns = document.querySelectorAll('.record-btn');
+      btns.forEach(btn => {
+        if (btn.textContent.includes(type.replace('喝奶-', ''))) {
+          btn.style.transform = 'scale(1.1)';
+          setTimeout(() => btn.style.transform = '', 200);
         }
       });
-    });
 
-    // 初始化
-    loadStats();
+      showToast('✅ 已记录');
+      updateUI();
+    }
 
-    // 导出数据
+    // ============== 更新界面 ==============
+    function updateUI() {
+      const records = getRecords();
+      const now = new Date();
+      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+      // 统计今日
+      let todayPoop = 0, todayPee = 0, todayMilk = 0;
+      records.forEach(r => {
+        const t = new Date(r.time);
+        if (t >= todayStart) {
+          if (r.type === '大便') todayPoop++;
+          else if (r.type === '小便') todayPee++;
+          else if (r.type === '喝奶-奶粉' || r.type === '喝奶-母乳') todayMilk++;
+        }
+      });
+
+      document.getElementById('todayPoop').textContent = todayPoop;
+      document.getElementById('todayPee').textContent = todayPee;
+      document.getElementById('todayMilk').textContent = todayMilk;
+
+      // 最近记录（今天）
+      const todayRecords = records
+        .filter(r => new Date(r.time) >= todayStart)
+        .sort((a, b) => new Date(b.time) - new Date(a.time))
+        .slice(0, 10);
+
+      // 如果今天没记录，显示昨天的
+      const showRecords = todayRecords.length > 0 ? todayRecords : records.slice(-5).reverse();
+
+      const list = document.getElementById('historyList');
+      if (records.length === 0) {
+        list.innerHTML = '<div class="history-empty">暂无记录<br>点击上方按钮开始记录</div>';
+        return;
+      }
+
+      // 判断是否显示日期
+      const showDate = todayRecords.length === 0 && records.length > 0;
+
+      list.innerHTML = showRecords.map(r => {
+        const map = TYPE_MAP[r.type] || TYPE_MAP['大便'];
+        const timeStr = showDate ? formatDate(r.time) + ' ' + formatTime(r.time) : formatTime(r.time);
+        return `
+          <div class="history-item ${map.class}">
+            <div class="time">${timeStr}</div>
+            <div class="type-icon">${map.icon}</div>
+            <div class="type-name">${r.type}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // ============== 导出导入 ==============
     function exportData() {
-      const records = getLocalRecords();
+      const records = getRecords();
       const blob = new Blob([JSON.stringify(records, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -744,31 +529,33 @@
       a.download = `baby-log-${new Date().toISOString().slice(0,10)}.json`;
       a.click();
       URL.revokeObjectURL(url);
-      showToast('✅ 导出成功');
+      hideMenu();
+      showToast('📤 导出成功');
     }
 
-    // 导入数据
     async function importData(file) {
       if (!file) return;
       try {
         const text = await file.text();
         const imported = JSON.parse(text);
         if (!Array.isArray(imported)) throw new Error('格式错误');
-        
-        const existing = getLocalRecords();
-        const merged = [...existing, ...imported];
-        // 去重
+
+        const existing = getRecords();
         const seen = new Set(existing.map(r => r.id));
-        const newRecords = merged.filter(r => !seen.has(r.id));
-        saveLocalRecords(newRecords);
-        
-        showToast(`✅ 导入成功，新增 ${imported.length} 条记录`);
-        loadHistory();
-        loadStats();
+        const newRecords = imported.filter(r => !seen.has(r.id));
+        saveRecords([...existing, ...newRecords]);
+
+        hideMenu();
+        showToast(`✅ 导入成功，新增 ${newRecords.length} 条`);
+        updateUI();
       } catch (e) {
-        showToast('❌ 导入失败: ' + e.message);
+        hideMenu();
+        showToast('❌ 导入失败');
       }
     }
+
+    // 初始化
+    updateUI();
   </script>
 </body>
 </html>
