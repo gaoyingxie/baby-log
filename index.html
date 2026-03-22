@@ -375,6 +375,12 @@
 
     <!-- 历史 Tab -->
     <div class="tab-content" id="historyTab">
+      <!-- 导出导入按钮 -->
+      <div style="padding: 12px 0; display: flex; gap: 8px;">
+        <button onclick="exportData()" style="flex:1; padding: 10px; border: none; border-radius: 10px; background: #6c5ce7; color: white; font-size: 14px; cursor: pointer;">📤 导出备份</button>
+        <button onclick="document.getElementById('importFile').click()" style="flex:1; padding: 10px; border: none; border-radius: 10px; background: #74b9ff; color: white; font-size: 14px; cursor: pointer;">📥 导入备份</button>
+        <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(this.files[0])">
+      </div>
       <div class="history-list" id="historyList">
         <div class="loading">加载中...</div>
       </div>
@@ -403,12 +409,17 @@
   <script>
     // ============== 配置区 ==============
     const CONFIG = {
-      // 飞书 Bitable 配置
+      // 存储模式: 'local' = localStorage, 'feishu' = 飞书Bitable
+      STORAGE_MODE: 'local',
+      // 飞书 Bitable 配置（STORAGE_MODE='feishu'时使用）
       BITABLE_APP_TOKEN: 'XlOBbGoBga2ArOsgSf1cZlYNnoe',
       BITABLE_TABLE_ID: 'tblZgtsnqGMBHPIn',
       BITABLE_APP_ID: 'cli_a93134be0c79dccc',
       BITABLE_APP_SECRET: 'XGFXmzsW6YGHzSDv0qLRddwcP3KP0slv',
     };
+
+    // localStorage key
+    const STORAGE_KEY = 'baby_log_records';
 
     // 类型映射
     const TYPE_MAP = {
@@ -418,10 +429,32 @@
       '喝奶-母乳': { icon: '🤱', class: 'milk' }
     };
 
-    // ============== 飞书 API ==============
+    // ============== 存储模块 ==============
+    
+    // localStorage 模式
+    function getLocalRecords() {
+      const data = localStorage.getItem(STORAGE_KEY);
+      return data ? JSON.parse(data) : [];
+    }
+
+    function saveLocalRecords(records) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+    }
+
+    function addLocalRecord(type) {
+      const records = getLocalRecords();
+      records.push({
+        id: Date.now().toString(),
+        type: type,
+        time: new Date().toISOString()
+      });
+      saveLocalRecords(records);
+      return records[records.length - 1];
+    }
+
+    // 飞书 API 模式
     let appAccessToken = '';
 
-    // 获取 App Access Token
     async function getAppAccessToken() {
       if (appAccessToken) return appAccessToken;
 
@@ -441,11 +474,9 @@
       throw new Error('获取 Token 失败: ' + JSON.stringify(data));
     }
 
-    // 创建记录
-    async function createRecord(type) {
+    async function createFeishuRecord(type) {
       await getAppAccessToken();
 
-      // 字段映射：类型 -> 字段名
       const fieldMap = {
         '大便': '大便',
         '小便': '小便',
@@ -454,8 +485,8 @@
       };
 
       const fields = {};
-      fields[fieldMap[type]] = '1';  // 该类型字段标记为1
-      fields['时间'] = new Date().toISOString();  // 记录时间
+      fields[fieldMap[type]] = '1';
+      fields['时间'] = new Date().toISOString();
 
       const res = await fetch(`https://open.feishu.cn/open-apis/bitable/v1/apps/${CONFIG.BITABLE_APP_TOKEN}/tables/${CONFIG.BITABLE_TABLE_ID}/records`, {
         method: 'POST',
@@ -473,8 +504,7 @@
       return data.data.record;
     }
 
-    // 获取记录列表
-    async function getRecords(limit = 30) {
+    async function getFeishuRecords(limit = 30) {
       await getAppAccessToken();
 
       const res = await fetch(
@@ -489,6 +519,23 @@
         throw new Error('获取记录失败: ' + JSON.stringify(data));
       }
       return data.data.items || [];
+    }
+
+    // 统一接口
+    async function createRecord(type) {
+      if (CONFIG.STORAGE_MODE === 'feishu') {
+        return await createFeishuRecord(type);
+      } else {
+        return addLocalRecord(type);
+      }
+    }
+
+    async function getRecords(limit = 30) {
+      if (CONFIG.STORAGE_MODE === 'feishu') {
+        return await getFeishuRecords(limit);
+      } else {
+        return getLocalRecords();
+      }
     }
 
     // ============== 业务逻辑 ==============
@@ -569,14 +616,22 @@
         records.sort((a, b) => new Date(b.fields['时间']) - new Date(a.fields['时间']));
 
         list.innerHTML = records.map(r => {
-          // 根据哪个字段有值来判断类型
-          let type = '未知';
-          let time = '时间未知';
-          if (r.fields['时间']) time = formatTime(r.fields['时间']);
-          if (r.fields['大便'] === '1') type = '大便';
-          else if (r.fields['小便'] === '1') type = '小便';
-          else if (r.fields['喝奶-奶粉'] === '1') type = '喝奶-奶粉';
-          else if (r.fields['喝奶-母乳'] === '1') type = '喝奶-母乳';
+          // localStorage 格式: {id, type, time}
+          // 飞书格式: {fields: {...}}
+          let type, time;
+          if (r.fields) {
+            // 飞书格式
+            if (r.fields['大便'] === '1') type = '大便';
+            else if (r.fields['小便'] === '1') type = '小便';
+            else if (r.fields['喝奶-奶粉'] === '1') type = '喝奶-奶粉';
+            else if (r.fields['喝奶-母乳'] === '1') type = '喝奶-母乳';
+            else type = '未知';
+            time = r.fields['时间'] ? formatTime(r.fields['时间']) : '时间未知';
+          } else {
+            // localStorage 格式
+            type = r.type || '未知';
+            time = r.time ? formatTime(r.time) : '时间未知';
+          }
           const map = TYPE_MAP[type] || TYPE_MAP['大便'];
           return `
             <div class="history-item ${map.class}">
@@ -613,27 +668,34 @@
         let weekPoop = 0, weekPee = 0, weekMilk = 0;
 
         records.forEach(r => {
-          const timeStr = r.fields['时间'];
+          // localStorage: {id, type, time}
+          // 飞书: {fields: {...}}
+          let timeStr, type;
+          if (r.fields) {
+            timeStr = r.fields['时间'];
+            if (r.fields['大便'] === '1') type = '大便';
+            else if (r.fields['小便'] === '1') type = '小便';
+            else if (r.fields['喝奶-奶粉'] === '1' || r.fields['喝奶-母乳'] === '1') type = '喝奶';
+            else return;
+          } else {
+            timeStr = r.time;
+            type = r.type;
+          }
+
           if (!timeStr) return;
           const t = new Date(timeStr);
           if (isNaN(t.getTime())) return;
 
-          // 根据哪个字段有值来判断类型
-          let type = null;
-          if (r.fields['大便'] === '1') type = '大便';
-          else if (r.fields['小便'] === '1') type = '小便';
-          else if (r.fields['喝奶-奶粉'] === '1' || r.fields['喝奶-母乳'] === '1') type = '喝奶';
-
           if (t >= todayStart) {
             if (type === '大便') todayPoop++;
             else if (type === '小便') todayPee++;
-            else if (type === '喝奶') todayMilk++;
+            else if (type === '喝奶' || type === '喝奶-奶粉' || type === '喝奶-母乳') todayMilk++;
           }
 
           if (t >= weekStart) {
             if (type === '大便') weekPoop++;
             else if (type === '小便') weekPee++;
-            else if (type === '喝奶') weekMilk++;
+            else if (type === '喝奶' || type === '喝奶-奶粉' || type === '喝奶-母乳') weekMilk++;
           }
         });
 
@@ -672,6 +734,42 @@
 
     // 初始化
     loadStats();
+
+    // 导出数据
+    function exportData() {
+      const records = getLocalRecords();
+      const blob = new Blob([JSON.stringify(records, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `baby-log-${new Date().toISOString().slice(0,10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('✅ 导出成功');
+    }
+
+    // 导入数据
+    async function importData(file) {
+      if (!file) return;
+      try {
+        const text = await file.text();
+        const imported = JSON.parse(text);
+        if (!Array.isArray(imported)) throw new Error('格式错误');
+        
+        const existing = getLocalRecords();
+        const merged = [...existing, ...imported];
+        // 去重
+        const seen = new Set(existing.map(r => r.id));
+        const newRecords = merged.filter(r => !seen.has(r.id));
+        saveLocalRecords(newRecords);
+        
+        showToast(`✅ 导入成功，新增 ${imported.length} 条记录`);
+        loadHistory();
+        loadStats();
+      } catch (e) {
+        showToast('❌ 导入失败: ' + e.message);
+      }
+    }
   </script>
 </body>
 </html>
