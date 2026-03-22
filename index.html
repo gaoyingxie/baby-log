@@ -290,6 +290,28 @@
     </div>
   </div>
 
+  <!-- 记录详情弹窗 -->
+  <div class="modal-overlay" id="recordDetailModal">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-title" id="recordDetailTitle">📋 记录详情</div>
+      <div id="recordDetailType" style="text-align:center;font-size:28px;margin-bottom:8px;"></div>
+      <div id="recordDetailInfo" style="text-align:center;color:var(--text-light);font-size:14px;margin-bottom:16px;"></div>
+      <div id="recordDetailEdit" style="display:none;">
+        <div class="form-group" id="recordDetailTimeGroup">
+          <label>时间</label>
+          <input type="datetime-local" id="recordDetailTime">
+        </div>
+        <div class="form-group" id="recordDetailAmountGroup">
+          <label id="recordDetailAmountLabel">数值</label>
+          <input type="number" id="recordDetailAmount" step="0.01">
+        </div>
+      </div>
+      <button class="modal-btn export" id="recordDetailSaveBtn" onclick="saveRecordEdit()" style="display:none;">保存修改</button>
+      <button class="modal-btn cancel" id="recordDetailDeleteBtn" onclick="deleteRecord()" style="background:#e74c3c;color:white;display:none;">删除此记录</button>
+      <button class="modal-btn cancel" onclick="hideRecordDetailModal()">关闭</button>
+    </div>
+  </div>
+
   <div class="modal-overlay" id="babyInfoModal">
     <div class="modal" onclick="event.stopPropagation()">
       <div class="modal-title">👶 宝宝信息</div>
@@ -667,7 +689,7 @@
       list.innerHTML = sorted.map(r => {
         const map = TYPE_MAP[r.type] || TYPE_MAP['大便'];
         const extra = r.type === '体重' ? ` ${r.amount}kg` : (r.amount ? ` ${r.amount}ml` : '');
-        return `<div class="history-item ${map.class}">
+        return `<div class="history-item ${map.class}" onclick="showRecordDetail('${r.id}')" style="cursor:pointer;">
           <div class="time">${formatFull(r.time)}</div>
           <div class="type-icon">${map.icon}</div>
           <div class="info">
@@ -780,6 +802,84 @@
     }
 
     function hideTodayDetailModal(e) { if (e && e.target !== e.currentTarget) return; document.getElementById('todayDetailModal').classList.remove('show'); }
+
+    // ========== 记录详情 ==========
+    let pendingEditRecord = null;
+
+    function showRecordDetail(recordId) {
+      const r = records.find(x => x.id === recordId);
+      if (!r) return;
+      pendingEditRecord = r;
+      const map = TYPE_MAP[r.type] || TYPE_MAP['大便'];
+
+      document.getElementById('recordDetailTitle').textContent = map.icon + ' ' + r.type;
+      document.getElementById('recordDetailType').textContent = map.icon;
+      document.getElementById('recordDetailInfo').textContent = formatFull(r.time);
+
+      const timeInput = document.getElementById('recordDetailTime');
+      const dt = new Date(r.time);
+      timeInput.value = new Date(dt.getTime() - dt.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+
+      const amountGroup = document.getElementById('recordDetailAmountGroup');
+      const amountInput = document.getElementById('recordDetailAmount');
+      const amountLabel = document.getElementById('recordDetailAmountLabel');
+
+      if (r.type === '体重') {
+        amountGroup.style.display = 'block';
+        amountLabel.textContent = '体重（kg）';
+        amountInput.value = r.amount || '';
+      } else if (r.type === '喝奶-奶粉' || r.type === '喝奶-母乳') {
+        amountGroup.style.display = 'block';
+        amountLabel.textContent = '奶量（ml）';
+        amountInput.value = r.amount || '';
+      } else {
+        amountGroup.style.display = 'none';
+      }
+
+      document.getElementById('recordDetailEdit').style.display = 'block';
+      document.getElementById('recordDetailSaveBtn').style.display = 'block';
+      document.getElementById('recordDetailDeleteBtn').style.display = 'block';
+
+      document.getElementById('recordDetailModal').classList.add('show');
+    }
+
+    function hideRecordDetailModal() {
+      document.getElementById('recordDetailModal').classList.remove('show');
+      pendingEditRecord = null;
+    }
+
+    async function saveRecordEdit() {
+      if (!pendingEditRecord) return;
+      const timeVal = document.getElementById('recordDetailTime').value;
+      const amountVal = document.getElementById('recordDetailAmount').value;
+
+      if (!timeVal) { showToast('请选择时间'); return; }
+
+      const time = new Date(timeVal).toISOString();
+      const amount = amountVal ? parseFloat(amountVal) : null;
+
+      try {
+        await supabaseUpdate('records', { time, amount }, `?id=eq.${pendingEditRecord.id}`);
+        await loadRecords();
+        await updateStats();
+        hideRecordDetailModal();
+        loadHistory();
+        showToast('✅ 已修改');
+      } catch(e) { showToast('❌ 修改失败'); }
+    }
+
+    async function deleteRecord() {
+      if (!pendingEditRecord) return;
+      if (!confirm('确认删除这条记录？')) return;
+      try {
+        await supabaseDelete('records', `?id=eq.${pendingEditRecord.id}`);
+        await loadRecords();
+        await updateStats();
+        hideRecordDetailModal();
+        loadHistory();
+        showToast('🗑️ 已删除');
+      } catch(e) { showToast('❌ 删除失败'); }
+    }
 
     // ========== 菜单 ==========
     function showMenu() { document.getElementById('menuModal').classList.add('show'); }
