@@ -457,7 +457,7 @@
             <div class="label">大便</div>
           </div>
           <div class="stat-item pee" onclick="showTodayDetail('小便')" style="cursor:pointer;">
-            <div class="icon">🚼</div>
+            <div class="icon">💧</div>
             <div class="num" id="todayPee">0</div>
             <div class="label">小便</div>
           </div>
@@ -778,7 +778,7 @@
     // 大便/小便弹窗
     function showPoopPeeModal(type) {
       pendingPoopPeeType = type;
-      document.getElementById('poopPeeTitle').textContent = type === '大便' ? '💩 记录大便' : '🚼 记录小便';
+      document.getElementById('poopPeeTitle').textContent = type === '大便' ? '💩 记录大便' : '💧 记录小便';
       const now = new Date();
       const iso = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
       document.getElementById('poopPeeDateTime').value = iso;
@@ -796,7 +796,7 @@
       if (navigator.vibrate) navigator.vibrate(50);
       addRecord(pendingPoopPeeType, null, time);
       hidePoopPeeModal();
-      const icon = pendingPoopPeeType === '大便' ? '💩' : '🚼';
+      const icon = pendingPoopPeeType === '大便' ? '💩' : '💧';
       showToast(`${icon} 已记录`);
       updateStats();
     }
@@ -862,7 +862,7 @@
 
       const titleMap = {
         '大便': '💩 今日大便',
-        '小便': '🚼 今日小便',
+        '小便': '💧 今日小便',
         '喝奶': '🍼 今日喝奶（瓶喂）',
         '喂奶': '🍼🤱 今日喂奶（全部）'
       };
@@ -1080,7 +1080,7 @@
       }
       if (navigator.vibrate) navigator.vibrate(50);
       addRecord(type);
-      const icon = type === '大便' ? '💩' : '🚼';
+      const icon = type === '大便' ? '💩' : '💧';
       showToast(`${icon} 已记录`);
       updateStats();
     }
