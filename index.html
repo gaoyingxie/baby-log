@@ -601,11 +601,6 @@
     async function loadHistory() {
       const list = document.getElementById('historyList');
 
-      if (!CONFIG.BITABLE_APP_TOKEN) {
-        list.innerHTML = '<div class="error-msg">请先配置飞书 Bitable</div>';
-        return;
-      }
-
       try {
         const records = await getRecords(30);
 
@@ -614,8 +609,12 @@
           return;
         }
 
-        // 按时间倒序
-        records.sort((a, b) => new Date(b.fields['时间']) - new Date(a.fields['时间']));
+        // 按时间倒序（兼容 localStorage 和飞书格式）
+        records.sort((a, b) => {
+          const timeA = a.fields ? a.fields['时间'] : a.time;
+          const timeB = b.fields ? b.fields['时间'] : b.time;
+          return new Date(timeB) - new Date(timeA);
+        });
 
         list.innerHTML = records.map(r => {
           // localStorage 格式: {id, type, time}
@@ -653,8 +652,6 @@
 
     // 加载统计
     async function loadStats() {
-      if (!CONFIG.BITABLE_APP_TOKEN) return;
-
       try {
         const records = await getRecords(100);
         const now = new Date();
