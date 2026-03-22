@@ -452,13 +452,13 @@
           </div>
           <div class="stat-item milk">
             <div class="icon">🍼</div>
-            <div class="num" id="todayMilkFormula">0</div>
-            <div class="label">奶粉 ml</div>
+            <div class="num" id="todayMilkAmount">0</div>
+            <div class="label">喝奶 ml</div>
           </div>
-          <div class="stat-item breast">
-            <div class="icon">🤱</div>
-            <div class="num" id="todayMilkBreast">0</div>
-            <div class="label">母乳 次</div>
+          <div class="stat-item">
+            <div class="icon">🍼🤱</div>
+            <div class="num" id="todayFeedCount">0</div>
+            <div class="label">喂奶 次</div>
           </div>
         </div>
       </div>
@@ -710,7 +710,7 @@
       const todayStart = getStartOfDay(now);
       const weekStart = getStartOfWeek(now);
 
-      let todayPoop = 0, todayPee = 0, todayMilkFormula = 0, todayMilkBreast = 0;
+      let todayPoop = 0, todayPee = 0, todayMilkAmount = 0, todayFeedCount = 0;
       const weekDays = [[], [], [], [], [], [], []];
 
       records.forEach(r => {
@@ -718,8 +718,10 @@
         if (t >= todayStart) {
           if (r.type === '大便') todayPoop++;
           else if (r.type === '小便') todayPee++;
-          else if (r.type === '喝奶-奶粉') todayMilkFormula += (r.amount || 0);
-          else if (r.type === '喝奶-母乳') todayMilkBreast++;
+          else if (r.type === '喝奶-奶粉' || r.type === '喝奶-母乳') {
+            todayMilkAmount += (r.amount || 0);
+            todayFeedCount++;
+          }
         }
         if (t >= weekStart) {
           const dayIdx = (t.getDay() || 7) - 1;
@@ -729,8 +731,8 @@
 
       document.getElementById('todayPoop').textContent = todayPoop;
       document.getElementById('todayPee').textContent = todayPee;
-      document.getElementById('todayMilkFormula').textContent = todayMilkFormula;
-      document.getElementById('todayMilkBreast').textContent = todayMilkBreast;
+      document.getElementById('todayMilkAmount').textContent = todayMilkAmount;
+      document.getElementById('todayFeedCount').textContent = todayFeedCount;
 
       // 本周柱状图
       const dayNames = ['一', '二', '三', '四', '五', '六', '日'];
