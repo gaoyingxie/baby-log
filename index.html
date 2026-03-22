@@ -429,9 +429,13 @@
             <span class="icon">🚼</span>
             <span class="label">小便</span>
           </button>
-          <button class="record-btn milk" onclick="showFeedMilkModal()" style="grid-column: span 2;">
+          <button class="record-btn milk" onclick="record('喂奶')">
             <span class="icon">🍼</span>
-            <span class="label">喂奶</span>
+            <span class="label">瓶喂</span>
+          </button>
+          <button class="record-btn breast" onclick="record('亲喂')">
+            <span class="icon">🤱</span>
+            <span class="label">亲喂</span>
           </button>
         </div>
       </div>
@@ -555,6 +559,20 @@
     </div>
   </div>
 
+  <!-- 亲喂弹窗 -->
+  <div class="modal-overlay" id="breastFeedModal" onclick="hideBreastFeedModal(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-title">🤱 记录亲喂</div>
+      <div style="margin-bottom: 16px;">
+        <label style="font-size:13px;color:var(--text-light);display:block;margin-bottom:6px;">日期和时间</label>
+        <input type="datetime-local" id="breastFeedDateTime"
+               style="width:100%;padding:12px;border:2px solid var(--border);border-radius:12px;font-size:14px;outline:none;">
+      </div>
+      <button class="modal-btn export" onclick="confirmBreastFeed()">确认记录</button>
+      <button class="modal-btn cancel" onclick="hideBreastFeedModal()">取消</button>
+    </div>
+  </div>
+
   <div class="toast" id="toast"></div>
 
   <script>
@@ -564,7 +582,8 @@
       '大便':    { icon: '💩', class: 'poop' },
       '小便':    { icon: '🚼', class: 'pee' },
       '喝奶-奶粉': { icon: '🍼', class: 'milk' },
-      '喝奶-母乳': { icon: '🤱', class: 'breast' }
+      '喝奶-母乳': { icon: '🤱', class: 'breast' },
+      '亲喂':     { icon: '🤱', class: 'breast' }
     };
 
     let currentFilter = 'today';
@@ -681,6 +700,29 @@
       updateStats();
     }
 
+    // 亲喂弹窗
+    function showBreastFeedModal() {
+      const now = new Date();
+      const iso = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+      document.getElementById('breastFeedDateTime').value = iso;
+      document.getElementById('breastFeedModal').classList.add('show');
+    }
+
+    function hideBreastFeedModal(e) {
+      if (e && e.target !== e.currentTarget) return;
+      document.getElementById('breastFeedModal').classList.remove('show');
+    }
+
+    function confirmBreastFeed() {
+      const datetimeInput = document.getElementById('breastFeedDateTime').value;
+      const time = datetimeInput ? new Date(datetimeInput).toISOString() : new Date().toISOString();
+      if (navigator.vibrate) navigator.vibrate(50);
+      addRecord('亲喂', null, time);
+      hideBreastFeedModal();
+      showToast('🤱 亲喂已记录');
+      updateStats();
+    }
+
     function switchTab(tabId) {
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tabId));
       document.querySelectorAll('.tab-content').forEach(c => c.classList.toggle('active', c.id === tabId));
@@ -733,7 +775,12 @@
         showPoopPeeModal(type);
         return;
       }
-      // 喂奶走另一个弹窗
+      // 亲喂弹出时间选择
+      if (type === '亲喂') {
+        showBreastFeedModal();
+        return;
+      }
+      // 瓶喂走另一个弹窗
       if (type === '喂奶') {
         showFeedMilkModal();
         return;
@@ -762,9 +809,13 @@
         if (t >= todayStart) {
           if (r.type === '大便') todayPoop++;
           else if (r.type === '小便') todayPee++;
-          else if (r.type === '喝奶-奶粉' || r.type === '喝奶-母乳') {
-            todayMilkAmount += (r.amount || 0);
-            todayFeedCount++;
+          else if (r.type === '喝奶-奶粉' || r.type === '喝奶-母乳' || r.type === '亲喂') {
+            if (r.type === '亲喂') {
+              todayFeedCount++;
+            } else {
+              todayMilkAmount += (r.amount || 0);
+              todayFeedCount++;
+            }
           }
         }
       });
