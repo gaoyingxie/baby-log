@@ -192,6 +192,7 @@
     .stat-item.poop .num { color: var(--poop); }
     .stat-item.pee .num { color: var(--pee); }
     .stat-item.milk .num { color: #d4a017; }
+    .stat-item.breast .num { color: var(--breast); }
 
     /* History Filter */
     .filter-row {
@@ -428,11 +429,11 @@
             <span class="icon">🚼</span>
             <span class="label">小便</span>
           </button>
-          <button class="record-btn milk" onclick="record('喝奶-奶粉')">
+          <button class="record-btn milk" onclick="showMilkInput('喝奶-奶粉')">
             <span class="icon">🍼</span>
             <span class="label">奶粉</span>
           </button>
-          <button class="record-btn breast" onclick="record('喝奶-母乳')">
+          <button class="record-btn breast" onclick="showMilkInput('喝奶-母乳')">
             <span class="icon">🤱</span>
             <span class="label">母乳</span>
           </button>
@@ -455,8 +456,13 @@
           </div>
           <div class="stat-item milk">
             <div class="icon">🍼</div>
-            <div class="num" id="todayMilk">0</div>
-            <div class="label">喝奶</div>
+            <div class="num" id="todayMilkFormula">0</div>
+            <div class="label">奶粉 ml</div>
+          </div>
+          <div class="stat-item breast">
+            <div class="icon">🤱</div>
+            <div class="num" id="todayMilkBreast">0</div>
+            <div class="label">母乳 次</div>
           </div>
         </div>
       </div>
@@ -516,6 +522,22 @@
     </div>
   </div>
 
+  <!-- 喝奶输入弹窗 -->
+  <div class="modal-overlay" id="milkModal" onclick="hideMilkModal(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-title" id="milkModalTitle">🍼 记录喝奶</div>
+      <div style="margin-bottom: 16px;">
+        <label style="font-size:13px;color:var(--text-light);display:block;margin-bottom:8px;">请输入奶量（ml）</label>
+        <input type="number" id="milkAmount" placeholder="例如：120" 
+               style="width:100%;padding:14px;border:2px solid var(--border);border-radius:12px;font-size:16px;outline:none;"
+               onfocus="this.style.borderColor='var(--primary)'"
+               onblur="this.style.borderColor='var(--border)'">
+      </div>
+      <button class="modal-btn export" onclick="confirmMilk()">确认记录</button>
+      <button class="modal-btn cancel" onclick="hideMilkModal()">取消</button>
+    </div>
+  </div>
+
   <div class="toast" id="toast"></div>
 
   <script>
@@ -529,6 +551,7 @@
     };
 
     let currentFilter = 'today';
+    let pendingMilkType = null;
 
     // ========== 存储 ==========
     function getRecords() {
@@ -540,9 +563,9 @@
       localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
     }
 
-    function addRecord(type) {
+    function addRecord(type, amount) {
       const records = getRecords();
-      records.push({ id: Date.now().toString(), type, time: new Date().toISOString() });
+      records.push({ id: Date.now().toString(), type, time: new Date().toISOString(), amount: amount || null });
       saveRecords(records);
       return records[records.length - 1];
     }
@@ -557,6 +580,37 @@
 
     function showMenu() { document.getElementById('menuModal').classList.add('show'); }
     function hideMenu(e) { if (e && e.target !== e.currentTarget) return; document.getElementById('menuModal').classList.remove('show'); }
+
+    function showMilkInput(type) {
+      pendingMilkType = type;
+      const isFormula = type === '喝奶-奶粉';
+      document.getElementById('milkModalTitle').textContent = isFormula ? '🍼 记录奶粉' : '🤱 记录母乳';
+      document.getElementById('milkAmount').placeholder = isFormula ? '例如：120' : '母乳请填 1';
+      document.getElementById('milkAmount').value = '';
+      document.getElementById('milkModal').classList.add('show');
+      setTimeout(() => document.getElementById('milkAmount').focus(), 100);
+    }
+
+    function hideMilkModal(e) {
+      if (e && e.target !== e.currentTarget) return;
+      document.getElementById('milkModal').classList.remove('show');
+      pendingMilkType = null;
+    }
+
+    function confirmMilk() {
+      const amount = document.getElementById('milkAmount').value;
+      if (!amount || parseInt(amount) <= 0) {
+        showToast('请输入正确的量');
+        return;
+      }
+      const type = pendingMilkType;
+      if (navigator.vibrate) navigator.vibrate(50);
+      addRecord(type, parseInt(amount));
+      hideMilkModal();
+      const icon = type === '喝奶-奶粉' ? '🍼' : '🤱';
+      showToast(`${icon} 已记录 ${amount}ml`);
+      updateStats();
+    }
 
     function switchTab(tabId) {
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tabId));
@@ -614,7 +668,8 @@
           setTimeout(() => btn.style.transform = '', 200);
         }
       });
-      showToast('✅ 已记录');
+      const icon = type === '大便' ? '💩' : '🚼';
+      showToast(`${icon} 已记录`);
       updateStats();
     }
 
@@ -629,7 +684,7 @@
       const todayStart = getStartOfDay(now);
       const weekStart = getStartOfWeek(now);
 
-      let todayPoop = 0, todayPee = 0, todayMilk = 0;
+      let todayPoop = 0, todayPee = 0, todayMilkFormula = 0, todayMilkBreast = 0;
       const weekDays = [[], [], [], [], [], [], []];
 
       records.forEach(r => {
@@ -637,7 +692,8 @@
         if (t >= todayStart) {
           if (r.type === '大便') todayPoop++;
           else if (r.type === '小便') todayPee++;
-          else todayMilk++;
+          else if (r.type === '喝奶-奶粉') todayMilkFormula += (r.amount || 0);
+          else if (r.type === '喝奶-母乳') todayMilkBreast++;
         }
         if (t >= weekStart) {
           const dayIdx = (t.getDay() || 7) - 1;
@@ -647,7 +703,8 @@
 
       document.getElementById('todayPoop').textContent = todayPoop;
       document.getElementById('todayPee').textContent = todayPee;
-      document.getElementById('todayMilk').textContent = todayMilk;
+      document.getElementById('todayMilkFormula').textContent = todayMilkFormula;
+      document.getElementById('todayMilkBreast').textContent = todayMilkBreast;
 
       // 本周柱状图
       const dayNames = ['一', '二', '三', '四', '五', '六', '日'];
@@ -701,12 +758,13 @@
 
       list.innerHTML = sorted.map(r => {
         const map = TYPE_MAP[r.type] || TYPE_MAP['大便'];
+        const amountStr = (r.amount && r.amount > 0) ? ` ${r.amount}ml` : '';
         return `
           <div class="history-item ${map.class}">
             <div class="time">${formatFull(r.time)}</div>
             <div class="type-icon">${map.icon}</div>
             <div class="info">
-              <div class="type-name ${map.class}">${r.type}</div>
+              <div class="type-name ${map.class}">${r.type}${amountStr}</div>
               <div class="relative">${getRelativeTime(r.time)}</div>
             </div>
           </div>
