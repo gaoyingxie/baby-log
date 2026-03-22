@@ -722,69 +722,109 @@
       const w = cssW, h = cssH;
       cvs.clearRect(0, 0, w, h);
 
-      if (currentChartFilter === 'milk' || currentChartFilter === 'maxMilk') {
-        const byDay = {};
-        filtered.filter(r => r.type === '喝奶-奶粉' || r.type === '喝奶-母乳').forEach(r => {
-          const d = new Date(r.time).toISOString().slice(0, 10);
-          if (!byDay[d]) byDay[d] = [];
-          byDay[d].push(r.amount || 0);
-        });
-        const dates = Object.keys(byDay).sort();
-        if (dates.length === 0) { document.getElementById('chartSummary').textContent = '暂无喝奶数据'; return; }
-        const vals = dates.map(d => currentChartFilter === 'maxMilk' ? Math.max(...byDay[d]) : byDay[d].reduce((a, b) => a + b, 0));
-        const max = Math.max(...vals, 1);
-        const xStep = (w - 40) / Math.max(dates.length - 1, 1);
-        const points = vals.map((v, i) => ({
-          x: 20 + i * xStep,
-          y: h - 20 - (v / max) * (h - 30)
-        }));
-        // Draw line
-        cvs.strokeStyle = '#fdcb6e';
-        cvs.lineWidth = 2;
-        cvs.beginPath();
-        points.forEach((p, i) => i === 0 ? cvs.moveTo(p.x, p.y) : cvs.lineTo(p.x, p.y));
-        cvs.stroke();
-        // Draw dots
-        cvs.fillStyle = '#f9a825';
-        points.forEach(p => {
-          cvs.beginPath();
-          cvs.arc(p.x, p.y, 4, 0, Math.PI * 2);
-          cvs.fill();
-        });
-        // X axis labels
-        cvs.fillStyle = '#999';
-        cvs.font = '10px sans-serif';
-        cvs.textAlign = 'center';
-        dates.forEach((d, i) => {
-          const label = d.slice(5);
-          cvs.fillText(label, 20 + i * xStep, h - 4);
-        });
-        const total = vals.reduce((a, b) => a + b, 0);
-        document.getElementById('chartSummary').textContent = currentChartFilter === 'maxMilk' ? `最大单次：${Math.max(...vals)}ml` : `累计奶量：${total}ml（${vals.length}天）`;
-      } else {
-        const weights = filtered.filter(r => r.type === '体重').sort((a, b) => new Date(a.time) - new Date(b.time));
-        if (weights.length === 0) { document.getElementById('chartSummary').textContent = '暂无体重数据'; return; }
-        const minW = Math.min(...weights.map(r => r.amount));
-        const maxW = Math.max(...weights.map(r => r.amount));
-        const range = maxW - minW || 0.5;
-        const minDate = new Date(weights[0].time);
-        const maxDate = new Date(weights[weights.length - 1].time);
-        const dateRange = maxDate - minDate || 1;
-        cvs.strokeStyle = '#6c5ce7'; cvs.lineWidth = 2; cvs.beginPath();
-        weights.forEach((r, i) => {
-          const x = 20 + ((new Date(r.time) - minDate) / dateRange) * (w - 40);
-          const y = h - 20 - ((r.amount - minW) / range) * (h - 40);
-          i === 0 ? cvs.moveTo(x, y) : cvs.lineTo(x, y);
-        });
-        cvs.stroke();
-        cvs.fillStyle = '#6c5ce7';
-        weights.forEach(r => {
-          const x = 20 + ((new Date(r.time) - minDate) / dateRange) * (w - 40);
-          const y = h - 20 - ((r.amount - minW) / range) * (h - 40);
-          cvs.beginPath(); cvs.arc(x, y, 3, 0, Math.PI * 2); cvs.fill();
-        });
-        document.getElementById('chartSummary').textContent = `最新：${weights[weights.length-1].amount}kg | 最高：${maxW}kg | 最低：${minW}kg`;
+      const padding = { top: 10, right: 10, bottom: 30, left: 45 };
+      const chartW = w - padding.left - padding.right;
+      const chartH = h - padding.top - padding.bottom;
+
+      // 生成日期标签
+      const labels = [];
+      for (let i = 0; i < days; i++) {
+        const d = new Date(startDate);
+        d.setDate(d.getDate() + i);
+        labels.push(`${d.getMonth() + 1}/${d.getDate()}`);
       }
+
+      // 按天聚合
+      const dataPoints = [];
+      for (let i = 0; i < days; i++) {
+        const dayStart = new Date(startDate);
+        dayStart.setDate(dayStart.getDate() + i);
+        const dayEnd = new Date(dayStart);
+        dayEnd.setDate(dayEnd.getDate() + 1);
+        const dayRecords = filtered.filter(r => {
+          const t = new Date(r.time);
+          return t >= dayStart && t < dayEnd;
+        });
+        if (currentChartFilter === 'milk') {
+          dataPoints.push(dayRecords.filter(r => r.type === '喝奶-奶粉' || r.type === '喝奶-母乳').reduce((s, r) => s + (r.amount || 0), 0));
+        } else if (currentChartFilter === 'maxMilk') {
+          const amounts = dayRecords.filter(r => r.type === '喝奶-奶粉' || r.type === '喝奶-母乳').map(r => r.amount || 0);
+          dataPoints.push(amounts.length > 0 ? Math.max(...amounts) : null);
+        } else {
+          const wr = dayRecords.filter(r => r.type === '体重');
+          dataPoints.push(wr.length > 0 ? wr[wr.length - 1].amount : null);
+        }
+      }
+
+      const validValues = dataPoints.filter(v => v !== null && !isNaN(v));
+      if (validValues.length === 0) {
+        cvs.fillStyle = '#999';
+        cvs.font = '14px sans-serif';
+        cvs.textAlign = 'center';
+        cvs.fillText('暂无数据', w / 2, h / 2);
+        document.getElementById('chartSummary').textContent = '';
+        return;
+      }
+
+      const maxVal = Math.max(...validValues) * 1.2;
+      const minVal = currentChartFilter === 'weight' ? Math.min(...validValues) * 0.9 : 0;
+      const range = maxVal - minVal || 1;
+
+      // Y轴标签和网格线
+      cvs.strokeStyle = '#eee';
+      cvs.fillStyle = '#999';
+      cvs.font = '10px sans-serif';
+      cvs.textAlign = 'right';
+      const ySteps = 4;
+      for (let i = 0; i <= ySteps; i++) {
+        const y = padding.top + chartH - (i / ySteps) * chartH;
+        const val = minVal + (i / ySteps) * range;
+        cvs.fillText(currentChartFilter === 'weight' ? val.toFixed(1) : Math.round(val).toString(), padding.left - 5, y + 3);
+        cvs.beginPath();
+        cvs.moveTo(padding.left, y);
+        cvs.lineTo(w - padding.right, y);
+        cvs.stroke();
+      }
+
+      // X轴标签
+      cvs.textAlign = 'center';
+      const step = days <= 7 ? 1 : days <= 30 ? 7 : 10;
+      labels.forEach((label, i) => {
+        if (i % step === 0 || i === days - 1) {
+          const x = padding.left + (i / (days - 1 || 1)) * chartW;
+          cvs.fillText(label, x, h - 8);
+        }
+      });
+
+      // 画线
+      const color = currentChartFilter === 'weight' ? '#6c5ce7' : '#fdcb6e';
+      cvs.beginPath();
+      cvs.strokeStyle = color;
+      cvs.lineWidth = 2;
+      let started = false;
+      dataPoints.forEach((v, i) => {
+        if (v === null) { started = false; return; }
+        const x = padding.left + (i / (days - 1 || 1)) * chartW;
+        const y = padding.top + chartH - ((v - minVal) / range) * chartH;
+        if (!started) { cvs.moveTo(x, y); started = true; } else { cvs.lineTo(x, y); }
+      });
+      cvs.stroke();
+
+      // 画点
+      cvs.fillStyle = color;
+      dataPoints.forEach((v, i) => {
+        if (v === null) return;
+        const x = padding.left + (i / (days - 1 || 1)) * chartW;
+        const y = padding.top + chartH - ((v - minVal) / range) * chartH;
+        cvs.beginPath();
+        cvs.arc(x, y, 4, 0, Math.PI * 2);
+        cvs.fill();
+      });
+
+      const total = validValues.reduce((a, b) => a + b, 0);
+      if (currentChartFilter === 'milk') document.getElementById('chartSummary').textContent = `累计奶量：${total}ml`;
+      else if (currentChartFilter === 'maxMilk') document.getElementById('chartSummary').textContent = `最大单次：${Math.max(...validValues)}ml`;
+      else document.getElementById('chartSummary').textContent = `最新：${validValues[validValues.length-1]}kg`;
     }
 
     // ========== 今日详情 ==========
