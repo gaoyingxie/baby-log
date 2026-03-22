@@ -16,6 +16,8 @@
       --pee-bg: rgba(116,185,255,0.12);
       --milk: #fdcb6e;
       --milk-bg: rgba(253,203,110,0.2);
+      --breast: #fd79a8;
+      --breast-bg: rgba(253,121,168,0.12);
       --text: #2d3436;
       --text-light: #636e72;
       --border: #dfe6e9;
@@ -31,10 +33,10 @@
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
-      padding-bottom: env(safe-area-inset-bottom, 20px);
+      padding-bottom: 70px;
     }
 
-    .container { max-width: 480px; margin: 0 auto; padding: 0 16px 100px; }
+    .container { max-width: 480px; margin: 0 auto; padding: 0 16px; }
 
     /* Header */
     header {
@@ -59,10 +61,7 @@
 
     header h1 span { font-size: 26px; }
 
-    .header-actions {
-      display: flex;
-      gap: 8px;
-    }
+    .header-actions { display: flex; gap: 8px; }
 
     .icon-btn {
       width: 40px;
@@ -80,6 +79,41 @@
     }
 
     .icon-btn:active { transform: scale(0.92); }
+
+    /* Tab Nav */
+    .tab-nav {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      background: var(--card);
+      color: var(--text-light);
+      box-shadow: var(--shadow);
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .tab-btn.active {
+      background: var(--primary);
+      color: white;
+    }
+
+    .tab-btn .icon { font-size: 18px; }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
 
     /* Card */
     .card {
@@ -131,23 +165,17 @@
       background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 50%);
     }
 
-    .record-btn:active {
-      transform: scale(0.96);
-    }
-
+    .record-btn:active { transform: scale(0.96); }
     .record-btn .icon { font-size: 36px; position: relative; z-index: 1; }
     .record-btn .label { position: relative; z-index: 1; }
 
     .record-btn.poop { background: linear-gradient(145deg, var(--poop), #d63031); }
     .record-btn.pee { background: linear-gradient(145deg, var(--pee), #0984e3); }
     .record-btn.milk { background: linear-gradient(145deg, var(--milk), #f9a825); color: #5d4e1a; }
-    .record-btn.breast { background: linear-gradient(145deg, #fd79a8, #e84393); }
+    .record-btn.breast { background: linear-gradient(145deg, var(--breast), #e84393); }
 
     /* Stats */
-    .stats-row {
-      display: flex;
-      gap: 10px;
-    }
+    .stats-row { display: flex; gap: 10px; }
 
     .stat-item {
       flex: 1;
@@ -165,7 +193,31 @@
     .stat-item.pee .num { color: var(--pee); }
     .stat-item.milk .num { color: #d4a017; }
 
-    /* History */
+    /* History Filter */
+    .filter-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .filter-btn {
+      padding: 8px 14px;
+      border: none;
+      border-radius: 20px;
+      font-size: 13px;
+      cursor: pointer;
+      background: var(--card);
+      color: var(--text-light);
+      box-shadow: var(--shadow);
+      transition: all 0.2s;
+    }
+
+    .filter-btn.active {
+      background: var(--primary);
+      color: white;
+    }
+
+    /* History List */
     .history-list { display: flex; flex-direction: column; }
 
     .history-item {
@@ -180,18 +232,18 @@
     .history-item .time {
       font-size: 12px;
       color: var(--text-light);
-      width: 55px;
+      width: 70px;
       flex-shrink: 0;
     }
 
     .history-item .type-icon {
-      width: 38px;
-      height: 38px;
-      border-radius: 10px;
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 20px;
+      font-size: 22px;
       margin-right: 12px;
       flex-shrink: 0;
     }
@@ -199,11 +251,19 @@
     .history-item.poop .type-icon { background: var(--poop-bg); }
     .history-item.pee .type-icon { background: var(--pee-bg); }
     .history-item.milk .type-icon { background: var(--milk-bg); }
+    .history-item.breast .type-icon { background: var(--breast-bg); }
 
+    .history-item .info { flex: 1; }
     .history-item .type-name { font-weight: 600; font-size: 14px; }
-    .history-item.poop .type-name { color: var(--poop); }
-    .history-item.pee .type-name { color: #0984e3; }
-    .history-item.milk .type-name { color: #d4a017; }
+    .history-item .type-name.poop { color: var(--poop); }
+    .history-item .type-name.pee { color: #0984e3; }
+    .history-item .type-name.milk { color: #d4a017; }
+    .history-item .type-name.breast { color: var(--breast); }
+
+    .history-item .relative {
+      font-size: 11px;
+      color: var(--text-light);
+    }
 
     .history-empty {
       text-align: center;
@@ -211,6 +271,55 @@
       color: var(--text-light);
       font-size: 14px;
     }
+
+    /* Week Chart */
+    .week-chart {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      height: 100px;
+      padding: 10px 0;
+    }
+
+    .chart-bar {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .chart-bar .bar {
+      width: 28px;
+      border-radius: 6px 6px 0 0;
+      min-height: 4px;
+      transition: height 0.3s;
+    }
+
+    .chart-bar .bar.poop { background: var(--poop); }
+    .chart-bar .bar.pee { background: var(--pee); }
+    .chart-bar .bar.milk { background: var(--milk); }
+
+    .chart-bar .day {
+      font-size: 11px;
+      color: var(--text-light);
+    }
+
+    /* Summary Stats */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .summary-item {
+      padding: 12px;
+      border-radius: var(--radius-sm);
+      background: var(--bg);
+      text-align: center;
+    }
+
+    .summary-item .val { font-size: 24px; font-weight: 700; color: var(--primary); }
+    .summary-item .lbl { font-size: 11px; color: var(--text-light); margin-top: 2px; }
 
     /* Toast */
     .toast {
@@ -245,10 +354,7 @@
       transition: opacity 0.3s;
     }
 
-    .modal-overlay.show {
-      opacity: 1;
-      pointer-events: auto;
-    }
+    .modal-overlay.show { opacity: 1; pointer-events: auto; }
 
     .modal {
       background: var(--card);
@@ -262,12 +368,7 @@
 
     .modal-overlay.show .modal { transform: translateY(0); }
 
-    .modal-title {
-      font-size: 17px;
-      font-weight: 700;
-      margin-bottom: 16px;
-      text-align: center;
-    }
+    .modal-title { font-size: 17px; font-weight: 700; margin-bottom: 16px; text-align: center; }
 
     .modal-btn {
       width: 100%;
@@ -287,18 +388,11 @@
     .modal-btn.export { background: var(--primary); color: white; }
     .modal-btn.import { background: var(--primary-light); color: var(--primary); }
     .modal-btn.cancel { background: var(--bg); color: var(--text-light); margin-top: 6px; }
-
     .modal-btn:active { transform: scale(0.98); }
 
     #importFile { display: none; }
 
-    /* Version */
-    .version {
-      text-align: center;
-      font-size: 11px;
-      color: var(--text-light);
-      padding: 10px 0;
-    }
+    .version { text-align: center; font-size: 11px; color: var(--text-light); padding: 10px 0; }
   </style>
 </head>
 <body>
@@ -310,91 +404,133 @@
       </div>
     </header>
 
-    <!-- 快速记录 -->
-    <div class="card">
-      <div class="card-title">✨ 点击记录</div>
-      <div class="record-grid">
-        <button class="record-btn poop" onclick="record('大便')">
-          <span class="icon">💩</span>
-          <span class="label">大便</span>
-        </button>
-        <button class="record-btn pee" onclick="record('小便')">
-          <span class="icon">🚼</span>
-          <span class="label">小便</span>
-        </button>
-        <button class="record-btn milk" onclick="record('喝奶-奶粉')">
-          <span class="icon">🍼</span>
-          <span class="label">奶粉</span>
-        </button>
-        <button class="record-btn breast" onclick="record('喝奶-母乳')">
-          <span class="icon">🤱</span>
-          <span class="label">母乳</span>
-        </button>
+    <!-- Tab 导航 -->
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="recordTab" onclick="switchTab('recordTab')">
+        <span class="icon">✏️</span> 记录
+      </button>
+      <button class="tab-btn" data-tab="historyTab" onclick="switchTab('historyTab')">
+        <span class="icon">📋</span> 历史
+      </button>
+    </div>
+
+    <!-- 记录 Tab -->
+    <div class="tab-content active" id="recordTab">
+      <!-- 快速记录 -->
+      <div class="card">
+        <div class="card-title">✨ 点击记录</div>
+        <div class="record-grid">
+          <button class="record-btn poop" onclick="record('大便')">
+            <span class="icon">💩</span>
+            <span class="label">大便</span>
+          </button>
+          <button class="record-btn pee" onclick="record('小便')">
+            <span class="icon">🚼</span>
+            <span class="label">小便</span>
+          </button>
+          <button class="record-btn milk" onclick="record('喝奶-奶粉')">
+            <span class="icon">🍼</span>
+            <span class="label">奶粉</span>
+          </button>
+          <button class="record-btn breast" onclick="record('喝奶-母乳')">
+            <span class="icon">🤱</span>
+            <span class="label">母乳</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 今日统计 -->
+      <div class="card">
+        <div class="card-title">📊 今日统计</div>
+        <div class="stats-row">
+          <div class="stat-item poop">
+            <div class="icon">💩</div>
+            <div class="num" id="todayPoop">0</div>
+            <div class="label">大便</div>
+          </div>
+          <div class="stat-item pee">
+            <div class="icon">🚼</div>
+            <div class="num" id="todayPee">0</div>
+            <div class="label">小便</div>
+          </div>
+          <div class="stat-item milk">
+            <div class="icon">🍼</div>
+            <div class="num" id="todayMilk">0</div>
+            <div class="label">喝奶</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 本周趋势 -->
+      <div class="card">
+        <div class="card-title">📈 本周趋势</div>
+        <div class="week-chart" id="weekChart"></div>
       </div>
     </div>
 
-    <!-- 今日统计 -->
-    <div class="card">
-      <div class="card-title">📊 今日统计</div>
-      <div class="stats-row">
-        <div class="stat-item poop">
-          <div class="icon">💩</div>
-          <div class="num" id="todayPoop">0</div>
-          <div class="label">大便</div>
+    <!-- 历史 Tab -->
+    <div class="tab-content" id="historyTab">
+      <!-- 筛选 -->
+      <div class="filter-row">
+        <button class="filter-btn active" data-filter="today" onclick="setHistoryFilter('today')">今天</button>
+        <button class="filter-btn" data-filter="week" onclick="setHistoryFilter('week')">本周</button>
+        <button class="filter-btn" data-filter="month" onclick="setHistoryFilter('month')">本月</button>
+        <button class="filter-btn" data-filter="all" onclick="setHistoryFilter('all')">全部</button>
+      </div>
+
+      <!-- 汇总统计 -->
+      <div class="card">
+        <div class="card-title">📊 汇总</div>
+        <div class="summary-grid">
+          <div class="summary-item">
+            <div class="val" id="totalCount">0</div>
+            <div class="lbl">总记录</div>
+          </div>
+          <div class="summary-item">
+            <div class="val" id="avgPerDay">0</div>
+            <div class="lbl">日均</div>
+          </div>
         </div>
-        <div class="stat-item pee">
-          <div class="icon">🚼</div>
-          <div class="num" id="todayPee">0</div>
-          <div class="label">小便</div>
-        </div>
-        <div class="stat-item milk">
-          <div class="icon">🍼</div>
-          <div class="num" id="todayMilk">0</div>
-          <div class="label">喝奶</div>
+      </div>
+
+      <!-- 历史列表 -->
+      <div class="card">
+        <div class="card-title">📋 记录列表</div>
+        <div class="history-list" id="historyList">
+          <div class="history-empty">暂无记录</div>
         </div>
       </div>
     </div>
 
-    <!-- 最近记录 -->
-    <div class="card">
-      <div class="card-title">📋 最近记录</div>
-      <div class="history-list" id="historyList">
-        <div class="history-empty">暂无记录<br>点击上方按钮开始记录</div>
-      </div>
-    </div>
-
-    <div class="version">v0.2</div>
+    <div class="version">v0.3</div>
   </div>
 
   <!-- 设置菜单 -->
   <div class="modal-overlay" id="menuModal" onclick="hideMenu(event)">
     <div class="modal" onclick="event.stopPropagation()">
       <div class="modal-title">更多操作</div>
-      <button class="modal-btn export" onclick="exportData()">
-        📤 导出备份
-      </button>
-      <button class="modal-btn import" onclick="document.getElementById('importFile').click()">
-        📥 导入备份
-      </button>
+      <button class="modal-btn export" onclick="exportData()">📤 导出备份</button>
+      <button class="modal-btn import" onclick="document.getElementById('importFile').click()">📥 导入备份</button>
       <input type="file" id="importFile" accept=".json" onchange="importData(this.files[0])">
       <button class="modal-btn cancel" onclick="hideMenu()">取消</button>
     </div>
   </div>
 
-  <!-- Toast -->
   <div class="toast" id="toast"></div>
 
   <script>
-    // ============== 配置 ==============
+    // ========== 配置 ==========
     const STORAGE_KEY = 'baby_log_records';
     const TYPE_MAP = {
-      '大便': { icon: '💩', class: 'poop' },
-      '小便': { icon: '🚼', class: 'pee' },
+      '大便':    { icon: '💩', class: 'poop' },
+      '小便':    { icon: '🚼', class: 'pee' },
       '喝奶-奶粉': { icon: '🍼', class: 'milk' },
-      '喝奶-母乳': { icon: '🤱', class: 'milk' }
+      '喝奶-母乳': { icon: '🤱', class: 'breast' }
     };
 
-    // ============== 存储 ==============
+    let currentFilter = 'today';
+
+    // ========== 存储 ==========
     function getRecords() {
       const data = localStorage.getItem(STORAGE_KEY);
       return data ? JSON.parse(data) : [];
@@ -406,16 +542,12 @@
 
     function addRecord(type) {
       const records = getRecords();
-      records.push({
-        id: Date.now().toString(),
-        type: type,
-        time: new Date().toISOString()
-      });
+      records.push({ id: Date.now().toString(), type, time: new Date().toISOString() });
       saveRecords(records);
       return records[records.length - 1];
     }
 
-    // ============== UI ==============
+    // ========== UI ==========
     function showToast(msg) {
       const toast = document.getElementById('toast');
       toast.textContent = msg;
@@ -423,38 +555,58 @@
       setTimeout(() => toast.classList.remove('show'), 1500);
     }
 
-    function showMenu() {
-      document.getElementById('menuModal').classList.add('show');
+    function showMenu() { document.getElementById('menuModal').classList.add('show'); }
+    function hideMenu(e) { if (e && e.target !== e.currentTarget) return; document.getElementById('menuModal').classList.remove('show'); }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tabId));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.toggle('active', c.id === tabId));
+      if (tabId === 'historyTab') loadHistory();
     }
 
-    function hideMenu(e) {
-      if (e && e.target !== e.currentTarget) return;
-      document.getElementById('menuModal').classList.remove('show');
+    function setHistoryFilter(filter) {
+      currentFilter = filter;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b.dataset.filter === filter));
+      loadHistory();
     }
 
     function formatTime(iso) {
       const d = new Date(iso);
-      const h = d.getHours().toString().padStart(2, '0');
-      const m = d.getMinutes().toString().padStart(2, '0');
-      return `${h}:${m}`;
+      return `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
     }
 
     function formatDate(iso) {
       const d = new Date(iso);
-      const mon = d.getMonth() + 1;
-      const day = d.getDate();
-      return `${mon}月${day}日`;
+      return `${d.getMonth()+1}月${d.getDate()}日`;
     }
 
-    // ============== 记录 ==============
+    function formatFull(iso) {
+      const d = new Date(iso);
+      const mon = d.getMonth() + 1;
+      const day = d.getDate();
+      const h = d.getHours().toString().padStart(2, '0');
+      const m = d.getMinutes().toString().padStart(2, '0');
+      return `${mon}月${day}日 ${h}:${m}`;
+    }
+
+    function getRelativeTime(iso) {
+      const now = new Date();
+      const d = new Date(iso);
+      const diffMs = now - d;
+      const diffMin = Math.floor(diffMs / 60000);
+      const diffHr = Math.floor(diffMin / 60);
+      const diffDay = Math.floor(diffHr / 24);
+      if (diffMin < 1) return '刚刚';
+      if (diffMin < 60) return `${diffMin}分钟前`;
+      if (diffHr < 24) return `${diffHr}小时前`;
+      if (diffDay < 7) return `${diffDay}天前`;
+      return formatDate(iso);
+    }
+
+    // ========== 记录 ==========
     function record(type) {
-      // 震动
       if (navigator.vibrate) navigator.vibrate(50);
-
-      // 添加记录
       addRecord(type);
-
-      // 动画反馈
       const btns = document.querySelectorAll('.record-btn');
       btns.forEach(btn => {
         if (btn.textContent.includes(type.replace('喝奶-', ''))) {
@@ -462,25 +614,34 @@
           setTimeout(() => btn.style.transform = '', 200);
         }
       });
-
       showToast('✅ 已记录');
-      updateUI();
+      updateStats();
     }
 
-    // ============== 更新界面 ==============
-    function updateUI() {
+    // ========== 统计 ==========
+    function getStartOfDay(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+    function getStartOfWeek(d) { const day = d.getDay() || 7; return new Date(d - (day - 1) * 86400000); }
+    function getStartOfMonth(d) { return new Date(d.getFullYear(), d.getMonth(), 1); }
+
+    function updateStats() {
       const records = getRecords();
       const now = new Date();
-      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const todayStart = getStartOfDay(now);
+      const weekStart = getStartOfWeek(now);
 
-      // 统计今日
       let todayPoop = 0, todayPee = 0, todayMilk = 0;
+      const weekDays = [[], [], [], [], [], [], []];
+
       records.forEach(r => {
         const t = new Date(r.time);
         if (t >= todayStart) {
           if (r.type === '大便') todayPoop++;
           else if (r.type === '小便') todayPee++;
-          else if (r.type === '喝奶-奶粉' || r.type === '喝奶-母乳') todayMilk++;
+          else todayMilk++;
+        }
+        if (t >= weekStart) {
+          const dayIdx = (t.getDay() || 7) - 1;
+          weekDays[dayIdx].push(r.type);
         }
       });
 
@@ -488,45 +649,77 @@
       document.getElementById('todayPee').textContent = todayPee;
       document.getElementById('todayMilk').textContent = todayMilk;
 
-      // 最近记录（今天）
-      const todayRecords = records
-        .filter(r => new Date(r.time) >= todayStart)
-        .sort((a, b) => new Date(b.time) - new Date(a.time))
-        .slice(0, 10);
+      // 本周柱状图
+      const dayNames = ['一', '二', '三', '四', '五', '六', '日'];
+      const maxH = 70;
+      const chartHtml = weekDays.map((dayRecs, i) => {
+        const poop = dayRecs.filter(r => r === '大便').length;
+        const pee = dayRecs.filter(r => r === '小便').length;
+        const milk = dayRecs.filter(r => r.startsWith('喝奶')).length;
+        const total = poop + pee + milk;
+        const h = total > 0 ? Math.max(4, Math.min(maxH, total * 12)) : 4;
+        const isToday = i === ((now.getDay() || 7) - 1);
+        return `
+          <div class="chart-bar">
+            <div class="bar" style="height:${h}px;opacity:${isToday?1:0.6}"></div>
+            <div class="day" style="font-weight:${isToday?'700':'400'};color:${isToday?'var(--primary)':'inherit'}">${dayNames[i]}</div>
+          </div>
+        `;
+      }).join('');
+      document.getElementById('weekChart').innerHTML = chartHtml;
+    }
 
-      // 如果今天没记录，显示昨天的
-      const showRecords = todayRecords.length > 0 ? todayRecords : records.slice(-5).reverse();
+    // ========== 历史 ==========
+    function loadHistory() {
+      const records = getRecords();
+      const now = new Date();
+      let startDate = null;
+
+      if (currentFilter === 'today') startDate = getStartOfDay(now);
+      else if (currentFilter === 'week') startDate = getStartOfWeek(now);
+      else if (currentFilter === 'month') startDate = getStartOfMonth(now);
+
+      const filtered = startDate
+        ? records.filter(r => new Date(r.time) >= startDate)
+        : records;
+
+      // 汇总
+      const total = filtered.length;
+      const days = startDate ? Math.max(1, Math.ceil((now - startDate) / 86400000)) : 1;
+      const avg = total / days;
+      document.getElementById('totalCount').textContent = total;
+      document.getElementById('avgPerDay').textContent = avg.toFixed(1);
+
+      // 列表
+      const sorted = [...filtered].sort((a, b) => new Date(b.time) - new Date(a.time));
 
       const list = document.getElementById('historyList');
-      if (records.length === 0) {
-        list.innerHTML = '<div class="history-empty">暂无记录<br>点击上方按钮开始记录</div>';
+      if (sorted.length === 0) {
+        list.innerHTML = '<div class="history-empty">暂无记录</div>';
         return;
       }
 
-      // 判断是否显示日期
-      const showDate = todayRecords.length === 0 && records.length > 0;
-
-      list.innerHTML = showRecords.map(r => {
+      list.innerHTML = sorted.map(r => {
         const map = TYPE_MAP[r.type] || TYPE_MAP['大便'];
-        const timeStr = showDate ? formatDate(r.time) + ' ' + formatTime(r.time) : formatTime(r.time);
         return `
           <div class="history-item ${map.class}">
-            <div class="time">${timeStr}</div>
+            <div class="time">${formatFull(r.time)}</div>
             <div class="type-icon">${map.icon}</div>
-            <div class="type-name">${r.type}</div>
+            <div class="info">
+              <div class="type-name ${map.class}">${r.type}</div>
+              <div class="relative">${getRelativeTime(r.time)}</div>
+            </div>
           </div>
         `;
       }).join('');
     }
 
-    // ============== 导出导入 ==============
+    // ========== 导入导出 ==========
     function exportData() {
-      const records = getRecords();
-      const blob = new Blob([JSON.stringify(records, null, 2)], { type: 'application/json' });
+      const blob = new Blob([JSON.stringify(getRecords(), null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
-      a.href = url;
-      a.download = `baby-log-${new Date().toISOString().slice(0,10)}.json`;
+      a.href = url; a.download = `baby-log-${new Date().toISOString().slice(0,10)}.json`;
       a.click();
       URL.revokeObjectURL(url);
       hideMenu();
@@ -536,18 +729,16 @@
     async function importData(file) {
       if (!file) return;
       try {
-        const text = await file.text();
-        const imported = JSON.parse(text);
+        const imported = JSON.parse(await file.text());
         if (!Array.isArray(imported)) throw new Error('格式错误');
-
         const existing = getRecords();
         const seen = new Set(existing.map(r => r.id));
         const newRecords = imported.filter(r => !seen.has(r.id));
         saveRecords([...existing, ...newRecords]);
-
         hideMenu();
         showToast(`✅ 导入成功，新增 ${newRecords.length} 条`);
-        updateUI();
+        updateStats();
+        if (document.getElementById('historyTab').classList.contains('active')) loadHistory();
       } catch (e) {
         hideMenu();
         showToast('❌ 导入失败');
@@ -555,7 +746,7 @@
     }
 
     // 初始化
-    updateUI();
+    updateStats();
   </script>
 </body>
 </html>
