@@ -733,14 +733,31 @@
         if (dates.length === 0) { document.getElementById('chartSummary').textContent = '暂无喝奶数据'; return; }
         const vals = dates.map(d => currentChartFilter === 'maxMilk' ? Math.max(...byDay[d]) : byDay[d].reduce((a, b) => a + b, 0));
         const max = Math.max(...vals, 1);
-        const barSlot = (w - 40) / Math.max(dates.length, 1);
-        const barW = barSlot * 0.7;
-        const barGap = barSlot * 0.15;
-        cvs.fillStyle = '#fdcb6e';
-        vals.forEach((v, i) => {
-          const bx = 20 + i * barSlot + barGap;
-          const bh = (v / max) * (h - 30);
-          cvs.fillRect(bx, h - 20 - bh, barW, bh);
+        const xStep = (w - 40) / Math.max(dates.length - 1, 1);
+        const points = vals.map((v, i) => ({
+          x: 20 + i * xStep,
+          y: h - 20 - (v / max) * (h - 30)
+        }));
+        // Draw line
+        cvs.strokeStyle = '#fdcb6e';
+        cvs.lineWidth = 2;
+        cvs.beginPath();
+        points.forEach((p, i) => i === 0 ? cvs.moveTo(p.x, p.y) : cvs.lineTo(p.x, p.y));
+        cvs.stroke();
+        // Draw dots
+        cvs.fillStyle = '#f9a825';
+        points.forEach(p => {
+          cvs.beginPath();
+          cvs.arc(p.x, p.y, 4, 0, Math.PI * 2);
+          cvs.fill();
+        });
+        // X axis labels
+        cvs.fillStyle = '#999';
+        cvs.font = '10px sans-serif';
+        cvs.textAlign = 'center';
+        dates.forEach((d, i) => {
+          const label = d.slice(5);
+          cvs.fillText(label, 20 + i * xStep, h - 4);
         });
         const total = vals.reduce((a, b) => a + b, 0);
         document.getElementById('chartSummary').textContent = currentChartFilter === 'maxMilk' ? `最大单次：${Math.max(...vals)}ml` : `累计奶量：${total}ml（${vals.length}天）`;
