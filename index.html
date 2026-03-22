@@ -420,7 +420,7 @@
       <!-- 快速记录 -->
       <div class="card">
         <div class="card-title">✨ 点击记录</div>
-        <div class="record-grid">
+        <div class="record-grid" style="grid-template-columns: 1fr 1fr 1fr;">
           <button class="record-btn poop" onclick="record('大便')">
             <span class="icon">💩</span>
             <span class="label">大便</span>
@@ -436,6 +436,10 @@
           <button class="record-btn breast" onclick="record('亲喂')">
             <span class="icon">🤱</span>
             <span class="label">亲喂</span>
+          </button>
+          <button class="record-btn" onclick="record('体重')" style="background:linear-gradient(145deg,#a29bfe,#6c5ce7);grid-column:span 3;">
+            <span class="icon">⚖️</span>
+            <span class="label">体重</span>
           </button>
         </div>
       </div>
@@ -472,10 +476,24 @@
     <div class="tab-content" id="historyTab">
       <!-- 筛选 -->
       <div class="filter-row">
-        <button class="filter-btn active" data-filter="today" onclick="setHistoryFilter('today')">今天</button>
+        <button class="filter-btn" data-filter="today" onclick="setHistoryFilter('today')">今天</button>
         <button class="filter-btn" data-filter="week" onclick="setHistoryFilter('week')">本周</button>
         <button class="filter-btn" data-filter="month" onclick="setHistoryFilter('month')">本月</button>
         <button class="filter-btn" data-filter="all" onclick="setHistoryFilter('all')">全部</button>
+      </div>
+
+      <!-- 趋势图 -->
+      <div class="card" id="chartCard">
+        <div class="card-title">📈 趋势</div>
+        <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+          <button class="filter-btn active" data-chart="milk" onclick="setChartFilter('milk')" id="chartBtnMilk">喝奶量</button>
+          <button class="filter-btn" data-chart="maxMilk" onclick="setChartFilter('maxMilk')" id="chartBtnMaxMilk">最大单次</button>
+          <button class="filter-btn" data-chart="weight" onclick="setChartFilter('weight')" id="chartBtnWeight">体重</button>
+        </div>
+        <div id="chartContainer" style="height:180px;position:relative;">
+          <canvas id="trendChart" style="width:100%;height:100%;"></canvas>
+        </div>
+        <div id="chartSummary" style="margin-top:10px;font-size:12px;color:var(--text-light);text-align:center;"></div>
       </div>
 
       <!-- 汇总统计 -->
@@ -502,7 +520,7 @@
       </div>
     </div>
 
-    <div class="version">v0.6</div>
+    <div class="version">v0.7</div>
   </div>
 
   <!-- 设置菜单 -->
@@ -584,6 +602,25 @@
     </div>
   </div>
 
+  <!-- 体重弹窗 -->
+  <div class="modal-overlay" id="weightModal" onclick="hideWeightModal(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-title">⚖️ 记录体重</div>
+      <div style="margin-bottom: 12px;">
+        <label style="font-size:13px;color:var(--text-light);display:block;margin-bottom:6px;">日期</label>
+        <input type="date" id="weightDate"
+               style="width:100%;padding:12px;border:2px solid var(--border);border-radius:12px;font-size:14px;outline:none;">
+      </div>
+      <div style="margin-bottom: 16px;">
+        <label style="font-size:13px;color:var(--text-light);display:block;margin-bottom:6px;">体重（kg）</label>
+        <input type="number" id="weightAmount" step="0.01" placeholder="例如：6.55"
+               style="width:100%;padding:12px;border:2px solid var(--border);border-radius:12px;font-size:14px;outline:none;">
+      </div>
+      <button class="modal-btn export" onclick="confirmWeight()">确认记录</button>
+      <button class="modal-btn cancel" onclick="hideWeightModal()">取消</button>
+    </div>
+  </div>
+
   <!-- 今日详情弹窗 -->
   <div class="modal-overlay" id="todayDetailModal" onclick="hideTodayDetailModal(event)">
     <div class="modal" onclick="event.stopPropagation()">
@@ -602,11 +639,13 @@
       '大便':    { icon: '💩', class: 'poop' },
       '小便':    { icon: '🚼', class: 'pee' },
       '喝奶-奶粉': { icon: '🍼', class: 'milk' },
-      '喝奶-母乳': { icon: '🤱', class: 'breast' },
-      '亲喂':     { icon: '🤱', class: 'breast' }
+      '喝奶-母乳': { icon: '🍼', class: 'milk' },
+      '亲喂':     { icon: '🤱', class: 'breast' },
+      '体重':     { icon: '⚖️', class: 'weight' }
     };
 
     let currentFilter = 'today';
+    let currentChartFilter = 'milk';
     let selectedMilkType = 'formula';
     let pendingPoopPeeType = null;
 
@@ -743,6 +782,36 @@
       updateStats();
     }
 
+    // 体重弹窗
+    function showWeightModal() {
+      const now = new Date();
+      const dateStr = now.toISOString().slice(0, 10);
+      document.getElementById('weightDate').value = dateStr;
+      document.getElementById('weightAmount').value = '';
+      document.getElementById('weightModal').classList.add('show');
+      setTimeout(() => document.getElementById('weightAmount').focus(), 100);
+    }
+
+    function hideWeightModal(e) {
+      if (e && e.target !== e.currentTarget) return;
+      document.getElementById('weightModal').classList.remove('show');
+    }
+
+    function confirmWeight() {
+      const amount = document.getElementById('weightAmount').value;
+      const dateInput = document.getElementById('weightDate').value;
+      if (!amount || parseFloat(amount) <= 0) {
+        showToast('请输入正确的体重');
+        return;
+      }
+      const time = dateInput ? new Date(dateInput + 'T12:00:00').toISOString() : new Date().toISOString();
+      if (navigator.vibrate) navigator.vibrate(50);
+      addRecord('体重', parseFloat(amount), time);
+      hideWeightModal();
+      showToast(`⚖️ 体重 ${amount}kg 已记录`);
+      updateStats();
+    }
+
     // 今日详情弹窗
     function showTodayDetail(type) {
       const records = getRecords();
@@ -822,8 +891,18 @@
 
     function setHistoryFilter(filter) {
       currentFilter = filter;
-      document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b.dataset.filter === filter));
+      document.querySelectorAll('.filter-btn').forEach(b => {
+        if (b.dataset.filter) b.classList.toggle('active', b.dataset.filter === filter);
+      });
       loadHistory();
+    }
+
+    function setChartFilter(filter) {
+      currentChartFilter = filter;
+      document.querySelectorAll('[data-chart]').forEach(b => {
+        b.classList.toggle('active', b.dataset.chart === filter);
+      });
+      drawChart();
     }
 
     function formatTime(iso) {
@@ -869,6 +948,11 @@
       // 亲喂弹出时间选择
       if (type === '亲喂') {
         showBreastFeedModal();
+        return;
+      }
+      // 体重弹出体重输入
+      if (type === '体重') {
+        showWeightModal();
         return;
       }
       // 瓶喂走另一个弹窗
@@ -918,7 +1002,170 @@
     }
 
     // ========== 历史 ==========
+    function drawChart() {
+      const records = getRecords();
+      const now = new Date();
+      let days = 7;
+      if (currentFilter === 'week') days = 7;
+      else if (currentFilter === 'month') days = 30;
+      else if (currentFilter === 'all') days = 90;
+      else days = 1;
+
+      const startDate = new Date(now);
+      startDate.setDate(startDate.getDate() - days + 1);
+      startDate.setHours(0, 0, 0, 0);
+
+      // 生成日期标签和数据
+      const labels = [];
+      const dataPoints = [];
+      for (let i = 0; i < days; i++) {
+        const d = new Date(startDate);
+        d.setDate(d.getDate() + i);
+        labels.push(`${d.getMonth() + 1}/${d.getDate()}`);
+      }
+
+      // 按天聚合数据
+      for (let i = 0; i < days; i++) {
+        const dayStart = new Date(startDate);
+        dayStart.setDate(dayStart.getDate() + i);
+        const dayEnd = new Date(dayStart);
+        dayEnd.setDate(dayEnd.getDate() + 1);
+
+        const dayRecords = records.filter(r => {
+          const t = new Date(r.time);
+          return t >= dayStart && t < dayEnd;
+        });
+
+        if (currentChartFilter === 'milk') {
+          // 每日喝奶总量
+          const total = dayRecords
+            .filter(r => r.type === '喝奶-奶粉' || r.type === '喝奶-母乳')
+            .reduce((sum, r) => sum + (r.amount || 0), 0);
+          dataPoints.push(total);
+        } else if (currentChartFilter === 'maxMilk') {
+          // 每日最大单次喝奶量
+          const amounts = dayRecords
+            .filter(r => r.type === '喝奶-奶粉' || r.type === '喝奶-母乳')
+            .map(r => r.amount || 0);
+          dataPoints.push(amounts.length > 0 ? Math.max(...amounts) : 0);
+        } else if (currentChartFilter === 'weight') {
+          // 体重取最新的
+          const weightRecs = dayRecords.filter(r => r.type === '体重');
+          if (weightRecs.length > 0) {
+            dataPoints.push(weightRecs[weightRecs.length - 1].amount);
+          } else {
+            dataPoints.push(null);
+          }
+        }
+      }
+
+      // 画图
+      const canvas = document.getElementById('trendChart');
+      const ctx = canvas.getContext('2d');
+      const container = document.getElementById('chartContainer');
+      canvas.width = container.offsetWidth * 2;
+      canvas.height = container.offsetHeight * 2;
+      canvas.style.width = container.offsetWidth + 'px';
+      canvas.style.height = container.offsetHeight + 'px';
+      ctx.scale(2, 2);
+
+      const w = container.offsetWidth;
+      const h = container.offsetHeight;
+      const padding = { top: 10, right: 10, bottom: 30, left: 45 };
+      const chartW = w - padding.left - padding.right;
+      const chartH = h - padding.top - padding.bottom;
+
+      ctx.clearRect(0, 0, w, h);
+
+      // 只显示有数据的天
+      const validData = dataPoints.map((v, i) => v !== null && v !== undefined && !isNaN(v) ? v : null);
+      const validValues = validData.filter(v => v !== null);
+      if (validValues.length === 0) {
+        ctx.fillStyle = '#999';
+        ctx.font = '14px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('暂无数据', w / 2, h / 2);
+        document.getElementById('chartSummary').textContent = '';
+        return;
+      }
+
+      const maxVal = Math.max(...validValues) * 1.2;
+      const minVal = Math.min(...validValues) * 0.9;
+      const range = maxVal - minVal || 1;
+
+      // 画Y轴标签和网格线
+      ctx.strokeStyle = '#eee';
+      ctx.fillStyle = '#999';
+      ctx.font = '10px sans-serif';
+      ctx.textAlign = 'right';
+      const ySteps = 4;
+      for (let i = 0; i <= ySteps; i++) {
+        const y = padding.top + chartH - (i / ySteps) * chartH;
+        const val = minVal + (i / ySteps) * range;
+        ctx.fillText(currentChartFilter === 'weight' ? val.toFixed(1) : Math.round(val).toString(), padding.left - 5, y + 3);
+        ctx.beginPath();
+        ctx.moveTo(padding.left, y);
+        ctx.lineTo(w - padding.right, y);
+        ctx.stroke();
+      }
+
+      // X轴标签
+      ctx.textAlign = 'center';
+      const step = days <= 7 ? 1 : days <= 30 ? 7 : 10;
+      labels.forEach((label, i) => {
+        if (i % step === 0 || i === days - 1) {
+          const x = padding.left + (i / (days - 1 || 1)) * chartW;
+          ctx.fillText(label, x, h - 8);
+        }
+      });
+
+      // 画线
+      const drawLine = (data, color) => {
+        ctx.beginPath();
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2;
+        let started = false;
+        data.forEach((v, i) => {
+          if (v === null) return;
+          const x = padding.left + (i / (days - 1 || 1)) * chartW;
+          const y = padding.top + chartH - ((v - minVal) / range) * chartH;
+          if (!started) { ctx.moveTo(x, y); started = true; }
+          else ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+
+        // 画点
+        data.forEach((v, i) => {
+          if (v === null) return;
+          const x = padding.left + (i / (days - 1 || 1)) * chartW;
+          const y = padding.top + chartH - ((v - minVal) / range) * chartH;
+          ctx.beginPath();
+          ctx.fillStyle = color;
+          ctx.arc(x, y, 4, 0, Math.PI * 2);
+          ctx.fill();
+        });
+      };
+
+      if (currentChartFilter === 'milk') {
+        drawLine(dataPoints, '#6c5ce7');
+        document.getElementById('chartSummary').textContent = `近${days}天累计喝奶 ${dataPoints.reduce((a,b)=>a+(b||0),0)}ml`;
+      } else if (currentChartFilter === 'maxMilk') {
+        drawLine(dataPoints, '#e17055');
+        document.getElementById('chartSummary').textContent = `近${days}天最大单次 ${Math.max(...validValues)}ml`;
+      } else if (currentChartFilter === 'weight') {
+        drawLine(dataPoints, '#a29bfe');
+        const weightVals = validValues;
+        if (weightVals.length >= 2) {
+          const diff = (weightVals[weightVals.length-1] - weightVals[0]).toFixed(2);
+          document.getElementById('chartSummary').textContent = `体重 ${diff > 0 ? '+' : ''}${diff}kg（近${days}天）`;
+        } else if (weightVals.length === 1) {
+          document.getElementById('chartSummary').textContent = `当前体重 ${weightVals[0]}kg`;
+        }
+      }
+    }
+
     function loadHistory() {
+      drawChart();
       const records = getRecords();
       const now = new Date();
       let startDate = null;
@@ -950,12 +1197,13 @@
       list.innerHTML = sorted.map(r => {
         const map = TYPE_MAP[r.type] || TYPE_MAP['大便'];
         const amountStr = (r.amount && r.amount > 0) ? ` ${r.amount}ml` : '';
+        const weightStr = (r.type === '体重') ? ` ${r.amount}kg` : '';
         return `
           <div class="history-item ${map.class}">
             <div class="time">${formatFull(r.time)}</div>
             <div class="type-icon">${map.icon}</div>
             <div class="info">
-              <div class="type-name ${map.class}">${r.type}${amountStr}</div>
+              <div class="type-name ${map.class}">${r.type}${amountStr}${weightStr}</div>
               <div class="relative">${getRelativeTime(r.time)}</div>
             </div>
           </div>
