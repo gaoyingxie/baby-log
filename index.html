@@ -399,7 +399,10 @@
 <body>
   <div class="container">
     <header>
-      <h1><span>👶</span> 宝宝成长记录</h1>
+      <div>
+        <h1><span id="headerBabyIcon">👶</span> <span id="headerBabyName">宝宝</span></h1>
+        <div id="headerBabyAge" style="font-size:12px;color:var(--text-light);"></div>
+      </div>
       <div class="header-actions">
         <button class="icon-btn" onclick="showMenu()" title="更多">⚙️</button>
       </div>
@@ -520,13 +523,14 @@
       </div>
     </div>
 
-    <div class="version">v0.7</div>
+    <div class="version">v0.8</div>
   </div>
 
   <!-- 设置菜单 -->
   <div class="modal-overlay" id="menuModal" onclick="hideMenu(event)">
     <div class="modal" onclick="event.stopPropagation()">
       <div class="modal-title">更多操作</div>
+      <button class="modal-btn export" onclick="hideMenu();showBabyInfoModal();">👶 宝宝信息</button>
       <button class="modal-btn export" onclick="exportData()">📤 导出备份</button>
       <button class="modal-btn import" onclick="document.getElementById('importFile').click()">📥 导入备份</button>
       <input type="file" id="importFile" accept=".json" onchange="importData(this.files[0])">
@@ -621,6 +625,35 @@
     </div>
   </div>
 
+  <!-- 宝宝信息弹窗 -->
+  <div class="modal-overlay" id="babyInfoModal">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-title">👶 宝宝信息</div>
+      <div style="margin-bottom: 12px;">
+        <label style="font-size:13px;color:var(--text-light);display:block;margin-bottom:6px;">宝宝名字</label>
+        <input type="text" id="babyName" placeholder="例如：豆豆"
+               style="width:100%;padding:12px;border:2px solid var(--border);border-radius:12px;font-size:14px;outline:none;">
+      </div>
+      <div style="margin-bottom: 12px;">
+        <label style="font-size:13px;color:var(--text-light);display:block;margin-bottom:6px;">出生日期</label>
+        <input type="date" id="babyBirthday"
+               style="width:100%;padding:12px;border:2px solid var(--border);border-radius:12px;font-size:14px;outline:none;">
+      </div>
+      <div style="margin-bottom: 16px;">
+        <label style="font-size:13px;color:var(--text-light);display:block;margin-bottom:6px;">性别</label>
+        <div style="display:flex;gap:10px;">
+          <button id="genderBoy" onclick="selectGender('boy')" style="flex:1;padding:12px;border:2px solid var(--border);border-radius:12px;background:white;font-size:14px;cursor:pointer;">
+            👦 男宝
+          </button>
+          <button id="genderGirl" onclick="selectGender('girl')" style="flex:1;padding:12px;border:2px solid var(--border);border-radius:12px;background:white;font-size:14px;cursor:pointer;">
+            👧 女宝
+          </button>
+        </div>
+      </div>
+      <button class="modal-btn export" onclick="saveBabyInfoAndClose()">保存</button>
+    </div>
+  </div>
+
   <!-- 今日详情弹窗 -->
   <div class="modal-overlay" id="todayDetailModal" onclick="hideTodayDetailModal(event)">
     <div class="modal" onclick="event.stopPropagation()">
@@ -648,6 +681,31 @@
     let currentChartFilter = 'milk';
     let selectedMilkType = 'formula';
     let pendingPoopPeeType = null;
+
+    // 宝宝信息
+    const BABY_KEY = 'baby_info';
+    function getBabyInfo() {
+      const data = localStorage.getItem(BABY_KEY);
+      return data ? JSON.parse(data) : null;
+    }
+    function saveBabyInfo(info) {
+      localStorage.setItem(BABY_KEY, JSON.stringify(info));
+    }
+    function calcAge(birthDate) {
+      if (!birthDate) return '';
+      const birth = new Date(birthDate);
+      const now = new Date();
+      const diffMs = now - birth;
+      const totalDays = Math.floor(diffMs / 86400000);
+      if (totalDays < 0) return '未出生';
+      if (totalDays < 30) return `${totalDays}天`;
+      const months = Math.floor(totalDays / 30);
+      const days = totalDays % 30;
+      if (months < 12) return `${months}个月${days > 0 ? days + '天' : ''}`;
+      const years = Math.floor(months / 12);
+      const remainingMonths = months % 12;
+      return `${years}岁${remainingMonths > 0 ? remainingMonths + '个月' : ''}`;
+    }
 
     // ========== 存储 ==========
     function getRecords() {
@@ -873,6 +931,82 @@
     function hideClearConfirmModal(e) {
       if (e && e.target !== e.currentTarget) return;
       document.getElementById('clearConfirmModal').classList.remove('show');
+    }
+
+    let selectedGender = 'boy';
+
+    function showBabyInfoModal() {
+      const info = getBabyInfo();
+      if (info) {
+        document.getElementById('babyName').value = info.name || '';
+        document.getElementById('babyBirthday').value = info.birthday || '';
+        selectedGender = info.gender || 'boy';
+      } else {
+        document.getElementById('babyName').value = '';
+        document.getElementById('babyBirthday').value = '';
+        selectedGender = 'boy';
+      }
+      updateGenderUI();
+      document.getElementById('babyInfoModal').classList.add('show');
+      setTimeout(() => document.getElementById('babyName').focus(), 100);
+    }
+
+    function hideBabyInfoModal() {
+      document.getElementById('babyInfoModal').classList.remove('show');
+    }
+
+    function selectGender(g) {
+      selectedGender = g;
+      updateGenderUI();
+    }
+
+    function updateGenderUI() {
+      const boyBtn = document.getElementById('genderBoy');
+      const girlBtn = document.getElementById('genderGirl');
+      if (selectedGender === 'boy') {
+        boyBtn.style.borderColor = 'var(--primary)';
+        boyBtn.style.background = 'var(--primary-light)';
+        girlBtn.style.borderColor = 'var(--border)';
+        girlBtn.style.background = 'white';
+      } else {
+        girlBtn.style.borderColor = 'var(--primary)';
+        girlBtn.style.background = 'var(--primary-light)';
+        boyBtn.style.borderColor = 'var(--border)';
+        boyBtn.style.background = 'white';
+      }
+    }
+
+    function saveBabyInfoAndClose() {
+      const name = document.getElementById('babyName').value.trim();
+      const birthday = document.getElementById('babyBirthday').value;
+      if (!name) {
+        showToast('请输入宝宝名字');
+        return;
+      }
+      if (!birthday) {
+        showToast('请选择出生日期');
+        return;
+      }
+      saveBabyInfo({ name, birthday, gender: selectedGender });
+      hideBabyInfoModal();
+      updateBabyHeader();
+      showToast('✅ 宝宝信息已保存');
+    }
+
+    function updateBabyHeader() {
+      const info = getBabyInfo();
+      const iconEl = document.getElementById('headerBabyIcon');
+      const nameEl = document.getElementById('headerBabyName');
+      const ageEl = document.getElementById('headerBabyAge');
+      if (info && info.name) {
+        nameEl.textContent = info.name;
+        iconEl.textContent = info.gender === 'girl' ? '👧' : '👦';
+        ageEl.textContent = calcAge(info.birthday);
+      } else {
+        nameEl.textContent = '宝宝';
+        iconEl.textContent = '👶';
+        ageEl.textContent = '';
+      }
     }
 
     function confirmClearData() {
@@ -1244,6 +1378,11 @@
 
     // 初始化
     updateStats();
+    updateBabyHeader();
+    // 首次打开检查宝宝信息
+    if (!getBabyInfo()) {
+      setTimeout(() => showBabyInfoModal(), 500);
+    }
   </script>
 </body>
 </html>
