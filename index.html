@@ -466,6 +466,7 @@
       return `${years}岁${rem > 0 ? rem + '个月' : ''}`;
     }
 
+    function getStartOfDay(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
     function getStartOfWeek(d) { const day = d.getDay() || 7; return new Date(d - (day - 1) * 86400000); }
     function getStartOfMonth(d) { return new Date(d.getFullYear(), d.getMonth(), 1); }
     function formatFull(iso) {
