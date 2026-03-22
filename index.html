@@ -502,7 +502,7 @@
       </div>
     </div>
 
-    <div class="version">v0.5</div>
+    <div class="version">v0.6</div>
   </div>
 
   <!-- 设置菜单 -->
@@ -512,7 +512,18 @@
       <button class="modal-btn export" onclick="exportData()">📤 导出备份</button>
       <button class="modal-btn import" onclick="document.getElementById('importFile').click()">📥 导入备份</button>
       <input type="file" id="importFile" accept=".json" onchange="importData(this.files[0])">
+      <button class="modal-btn cancel" onclick="hideMenu();showClearConfirmModal();" style="background:#ffeef0;color:#e74c3c;margin-top:6px;">🗑️ 清空数据</button>
       <button class="modal-btn cancel" onclick="hideMenu()">取消</button>
+    </div>
+  </div>
+
+  <!-- 确认清空弹窗 -->
+  <div class="modal-overlay" id="clearConfirmModal" onclick="hideClearConfirmModal(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-title">⚠️ 确认清空？</div>
+      <p style="text-align:center;color:var(--text-light);margin-bottom:16px;font-size:14px;">此操作不可恢复，请先导出备份</p>
+      <button class="modal-btn cancel" onclick="confirmClearData()" style="background:#e74c3c;color:white;">确认清空</button>
+      <button class="modal-btn cancel" onclick="hideClearConfirmModal()">取消</button>
     </div>
   </div>
 
@@ -784,6 +795,23 @@
     function hideTodayDetailModal(e) {
       if (e && e.target !== e.currentTarget) return;
       document.getElementById('todayDetailModal').classList.remove('show');
+    }
+
+    function showClearConfirmModal() {
+      document.getElementById('clearConfirmModal').classList.add('show');
+    }
+
+    function hideClearConfirmModal(e) {
+      if (e && e.target !== e.currentTarget) return;
+      document.getElementById('clearConfirmModal').classList.remove('show');
+    }
+
+    function confirmClearData() {
+      localStorage.removeItem(STORAGE_KEY);
+      hideClearConfirmModal();
+      hideMenu();
+      showToast('🗑️ 数据已清空');
+      updateStats();
     }
 
     function switchTab(tabId) {
