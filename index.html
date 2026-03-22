@@ -1296,13 +1296,6 @@
         ? records.filter(r => new Date(r.time) >= startDate)
         : records;
 
-      // 汇总
-      const total = filtered.length;
-      const days = startDate ? Math.max(1, Math.ceil((now - startDate) / 86400000)) : 1;
-      const avg = total / days;
-      document.getElementById('totalCount').textContent = total;
-      document.getElementById('avgPerDay').textContent = avg.toFixed(1);
-
       // 列表
       const sorted = [...filtered].sort((a, b) => new Date(b.time) - new Date(a.time));
 
