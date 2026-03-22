@@ -462,12 +462,6 @@
           </div>
         </div>
       </div>
-
-      <!-- 本周趋势 -->
-      <div class="card">
-        <div class="card-title">📈 本周趋势</div>
-        <div class="week-chart" id="weekChart"></div>
-      </div>
     </div>
 
     <!-- 历史 Tab -->
@@ -708,10 +702,8 @@
       const records = getRecords();
       const now = new Date();
       const todayStart = getStartOfDay(now);
-      const weekStart = getStartOfWeek(now);
 
       let todayPoop = 0, todayPee = 0, todayMilkAmount = 0, todayFeedCount = 0;
-      const weekDays = [[], [], [], [], [], [], []];
 
       records.forEach(r => {
         const t = new Date(r.time);
@@ -723,35 +715,12 @@
             todayFeedCount++;
           }
         }
-        if (t >= weekStart) {
-          const dayIdx = (t.getDay() || 7) - 1;
-          weekDays[dayIdx].push(r.type);
-        }
       });
 
       document.getElementById('todayPoop').textContent = todayPoop;
       document.getElementById('todayPee').textContent = todayPee;
       document.getElementById('todayMilkAmount').textContent = todayMilkAmount;
       document.getElementById('todayFeedCount').textContent = todayFeedCount;
-
-      // 本周柱状图
-      const dayNames = ['一', '二', '三', '四', '五', '六', '日'];
-      const maxH = 70;
-      const chartHtml = weekDays.map((dayRecs, i) => {
-        const poop = dayRecs.filter(r => r === '大便').length;
-        const pee = dayRecs.filter(r => r === '小便').length;
-        const milk = dayRecs.filter(r => r.startsWith('喝奶')).length;
-        const total = poop + pee + milk;
-        const h = total > 0 ? Math.max(4, Math.min(maxH, total * 12)) : 4;
-        const isToday = i === ((now.getDay() || 7) - 1);
-        return `
-          <div class="chart-bar">
-            <div class="bar" style="height:${h}px;opacity:${isToday?1:0.6}"></div>
-            <div class="day" style="font-weight:${isToday?'700':'400'};color:${isToday?'var(--primary)':'inherit'}">${dayNames[i]}</div>
-          </div>
-        `;
-      }).join('');
-      document.getElementById('weekChart').innerHTML = chartHtml;
     }
 
     // ========== 历史 ==========
