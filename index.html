@@ -411,7 +411,9 @@
     const CONFIG = {
       // 存储模式: 'local' = localStorage, 'feishu' = 飞书Bitable
       STORAGE_MODE: 'local',
-      // 飞书 Bitable 配置（STORAGE_MODE='feishu'时使用）
+      // 代理地址（解决CORS用）
+      PROXY_BASE: 'https://gaoyingxie-baby.loca.lt/proxy',
+      // 飞书 Bitable 配置
       BITABLE_APP_TOKEN: 'XlOBbGoBga2ArOsgSf1cZlYNnoe',
       BITABLE_TABLE_ID: 'tblZgtsnqGMBHPIn',
       BITABLE_APP_ID: 'cli_a93134be0c79dccc',
@@ -458,7 +460,7 @@
     async function getAppAccessToken() {
       if (appAccessToken) return appAccessToken;
 
-      const res = await fetch('https://open.feishu.cn/open-apis/auth/v3/tenant_access_token/internal', {
+      const res = await fetch(CONFIG.PROXY_BASE + '/auth/v3/tenant_access_token/internal', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -488,7 +490,7 @@
       fields[fieldMap[type]] = '1';
       fields['时间'] = new Date().toISOString();
 
-      const res = await fetch(`https://open.feishu.cn/open-apis/bitable/v1/apps/${CONFIG.BITABLE_APP_TOKEN}/tables/${CONFIG.BITABLE_TABLE_ID}/records`, {
+      const res = await fetch(CONFIG.PROXY_BASE + `/bitable/v1/apps/${CONFIG.BITABLE_APP_TOKEN}/tables/${CONFIG.BITABLE_TABLE_ID}/records`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -508,7 +510,7 @@
       await getAppAccessToken();
 
       const res = await fetch(
-        `https://open.feishu.cn/open-apis/bitable/v1/apps/${CONFIG.BITABLE_APP_TOKEN}/tables/${CONFIG.BITABLE_TABLE_ID}/records?page_size=${limit}&field_names=大便,小便,喝奶-奶粉,喝奶-母乳,时间`,
+        CONFIG.PROXY_BASE + `/bitable/v1/apps/${CONFIG.BITABLE_APP_TOKEN}/tables/${CONFIG.BITABLE_TABLE_ID}/records?page_size=${limit}&field_names=大便,小便,喝奶-奶粉,喝奶-母乳,时间`,
         {
           headers: { 'Authorization': 'Bearer ' + appAccessToken }
         }
