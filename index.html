@@ -442,24 +442,24 @@
 
       <!-- 今日统计 -->
       <div class="card">
-        <div class="card-title">📊 今日统计</div>
+        <div class="card-title">📊 今日统计 <span style="font-weight:normal;font-size:12px;color:var(--text-light)">（点击查看详情）</span></div>
         <div class="stats-row">
-          <div class="stat-item poop">
+          <div class="stat-item poop" onclick="showTodayDetail('大便')" style="cursor:pointer;">
             <div class="icon">💩</div>
             <div class="num" id="todayPoop">0</div>
             <div class="label">大便</div>
           </div>
-          <div class="stat-item pee">
+          <div class="stat-item pee" onclick="showTodayDetail('小便')" style="cursor:pointer;">
             <div class="icon">🚼</div>
             <div class="num" id="todayPee">0</div>
             <div class="label">小便</div>
           </div>
-          <div class="stat-item milk">
+          <div class="stat-item milk" onclick="showTodayDetail('喝奶')" style="cursor:pointer;">
             <div class="icon">🍼</div>
             <div class="num" id="todayMilkAmount">0</div>
             <div class="label">喝奶 ml</div>
           </div>
-          <div class="stat-item">
+          <div class="stat-item" onclick="showTodayDetail('喂奶')" style="cursor:pointer;">
             <div class="icon">🍼🤱</div>
             <div class="num" id="todayFeedCount">0</div>
             <div class="label">喂奶 次</div>
@@ -570,6 +570,15 @@
       </div>
       <button class="modal-btn export" onclick="confirmBreastFeed()">确认记录</button>
       <button class="modal-btn cancel" onclick="hideBreastFeedModal()">取消</button>
+    </div>
+  </div>
+
+  <!-- 今日详情弹窗 -->
+  <div class="modal-overlay" id="todayDetailModal" onclick="hideTodayDetailModal(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-title" id="todayDetailTitle">📋 今日详情</div>
+      <div id="todayDetailList" style="max-height:300px;overflow-y:auto;"></div>
+      <button class="modal-btn cancel" onclick="hideTodayDetailModal()" style="margin-top:16px;">关闭</button>
     </div>
   </div>
 
@@ -721,6 +730,60 @@
       hideBreastFeedModal();
       showToast('🤱 亲喂已记录');
       updateStats();
+    }
+
+    // 今日详情弹窗
+    function showTodayDetail(type) {
+      const records = getRecords();
+      const now = new Date();
+      const todayStart = getStartOfDay(now);
+
+      const titleMap = {
+        '大便': '💩 今日大便',
+        '小便': '🚼 今日小便',
+        '喝奶': '🍼 今日喝奶（瓶喂）',
+        '喂奶': '🍼🤱 今日喂奶（全部）'
+      };
+
+      document.getElementById('todayDetailTitle').textContent = titleMap[type] || '📋 今日详情';
+
+      let filtered = records.filter(r => {
+        const t = new Date(r.time);
+        if (t < todayStart) return false;
+        if (type === '大便') return r.type === '大便';
+        if (type === '小便') return r.type === '小便';
+        if (type === '喝奶') return r.type === '喝奶-奶粉' || r.type === '喝奶-母乳';
+        if (type === '喂奶') return r.type === '喝奶-奶粉' || r.type === '喝奶-母乳' || r.type === '亲喂';
+        return false;
+      });
+
+      filtered.sort((a, b) => new Date(b.time) - new Date(a.time));
+
+      if (filtered.length === 0) {
+        document.getElementById('todayDetailList').innerHTML = '<div style="text-align:center;color:var(--text-light);padding:20px;">暂无记录</div>';
+      } else {
+        document.getElementById('todayDetailList').innerHTML = filtered.map(r => {
+          const d = new Date(r.time);
+          const h = d.getHours().toString().padStart(2, '0');
+          const m = d.getMinutes().toString().padStart(2, '0');
+          const map = TYPE_MAP[r.type] || TYPE_MAP['大便'];
+          const amountStr = (r.amount && r.amount > 0) ? ` ${r.amount}ml` : '';
+          return `
+            <div style="display:flex;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);">
+              <span style="font-size:22px;margin-right:12px;">${map.icon}</span>
+              <span style="flex:1;font-size:14px;">${r.type}${amountStr}</span>
+              <span style="color:var(--text-light);font-size:14px;">${h}:${m}</span>
+            </div>
+          `;
+        }).join('');
+      }
+
+      document.getElementById('todayDetailModal').classList.add('show');
+    }
+
+    function hideTodayDetailModal(e) {
+      if (e && e.target !== e.currentTarget) return;
+      document.getElementById('todayDetailModal').classList.remove('show');
     }
 
     function switchTab(tabId) {
