@@ -836,7 +836,7 @@
         if (t < todayStart) return false;
         if (type === '大便') return r.type === '大便';
         if (type === '小便') return r.type === '小便';
-        if (type === '喝奶') return r.type === '喝奶-奶粉' || r.type === '喝奶-母乳' || r.type === '亲喂';
+        if (type === '喝奶' || type === '喂奶') return r.type === '喝奶-奶粉' || r.type === '喝奶-母乳' || r.type === '亲喂';
         return false;
       }).sort((a, b) => new Date(b.time) - new Date(a.time));
 
