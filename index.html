@@ -711,9 +711,15 @@
         if (dates.length === 0) { document.getElementById('chartSummary').textContent = '暂无喝奶数据'; return; }
         const vals = dates.map(d => currentChartFilter === 'maxMilk' ? Math.max(...byDay[d]) : byDay[d].reduce((a, b) => a + b, 0));
         const max = Math.max(...vals, 1);
-        const barW = (w - 40) / Math.max(dates.length, 1);
+        const barSlot = (w - 40) / Math.max(dates.length, 1);
+        const barW = barSlot * 0.7;
+        const barGap = barSlot * 0.15;
         cvs.fillStyle = '#fdcb6e';
-        vals.forEach((v, i) => { cvs.fillRect(20 + i * barW + 2, h - 20 - (v / max) * (h - 30), barW - 4, (v / max) * (h - 30)); });
+        vals.forEach((v, i) => {
+          const bx = 20 + i * barSlot + barGap;
+          const bh = (v / max) * (h - 30);
+          cvs.fillRect(bx, h - 20 - bh, barW, bh);
+        });
         const total = vals.reduce((a, b) => a + b, 0);
         document.getElementById('chartSummary').textContent = currentChartFilter === 'maxMilk' ? `最大单次：${Math.max(...vals)}ml` : `累计奶量：${total}ml（${vals.length}天）`;
       } else {
