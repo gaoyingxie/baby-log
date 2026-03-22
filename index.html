@@ -661,7 +661,7 @@
       '体重':     { icon: '⚖️', class: 'weight' }
     };
 
-    let currentFilter = 'today';
+    let currentFilter = 'week';
     let currentChartFilter = 'milk';
     let selectedMilkType = 'formula';
     let pendingPoopPeeType = null;
@@ -1288,8 +1288,7 @@
       const now = new Date();
       let startDate = null;
 
-      if (currentFilter === 'today') startDate = getStartOfDay(now);
-      else if (currentFilter === 'week') startDate = getStartOfWeek(now);
+      if (currentFilter === 'week') startDate = getStartOfWeek(now);
       else if (currentFilter === 'month') startDate = getStartOfMonth(now);
 
       const filtered = startDate
