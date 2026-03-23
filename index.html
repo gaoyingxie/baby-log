@@ -489,15 +489,6 @@
     }
 
     function getStartOfDay(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
-    function getStartOfWeek(d) {
-      const day = d.getDay();
-      const daysToMonday = day === 0 ? 6 : day - 1;
-      const result = new Date(d);
-      result.setDate(d.getDate() - daysToMonday);
-      result.setHours(0, 0, 0, 0);
-      return result;
-    }
-    function getStartOfMonth(d) { return new Date(d.getFullYear(), d.getMonth(), 1); }
     function formatFull(iso) {
       const d = new Date(iso);
       return `${d.getMonth()+1}月${d.getDate()}日 ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
@@ -686,9 +677,8 @@
       await loadRecords();
       await drawChart();
       const now = new Date();
-      let startDate = null;
-      if (currentFilter === 'week') startDate = getStartOfWeek(now);
-      else if (currentFilter === 'month') startDate = getStartOfMonth(now);
+      const days = currentFilter === 'week' ? 7 : currentFilter === 'month' ? 30 : 365;
+      const startDate = new Date(now - (days - 1) * 86400000);
       const filtered = startDate ? records.filter(r => new Date(r.time) >= startDate) : records;
       const sorted = [...filtered].sort((a, b) => new Date(b.time) - new Date(a.time));
       const list = document.getElementById('historyList');
@@ -711,7 +701,7 @@
       if (records.length === 0) await loadRecords();
       const now = new Date();
       const days = currentFilter === 'week' ? 7 : currentFilter === 'month' ? 30 : 90;
-      const startDate = currentFilter === 'week' ? getStartOfWeek(now) : new Date(now - days * 86400000);
+      const startDate = new Date(now - (days - 1) * 86400000);
       const filtered = records.filter(r => new Date(r.time) >= startDate);
       const ctx = document.getElementById('trendChart');
       if (!ctx) return;
