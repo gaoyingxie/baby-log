@@ -743,7 +743,8 @@
           return t >= dayStart && t < dayEnd;
         });
         if (currentChartFilter === 'milk') {
-          dataPoints.push(dayRecords.filter(r => r.type === '喝奶-奶粉' || r.type === '喝奶-母乳').reduce((s, r) => s + (r.amount || 0), 0));
+          const amounts = dayRecords.filter(r => r.type === '喝奶-奶粉' || r.type === '喝奶-母乳').map(r => r.amount || 0);
+          dataPoints.push(amounts.length > 0 ? amounts.reduce((s, v) => s + v, 0) : null);
         } else if (currentChartFilter === 'maxMilk') {
           const amounts = dayRecords.filter(r => r.type === '喝奶-奶粉' || r.type === '喝奶-母乳').map(r => r.amount || 0);
           dataPoints.push(amounts.length > 0 ? Math.max(...amounts) : null);
@@ -785,9 +786,11 @@
 
       // X轴标签
       cvs.textAlign = 'center';
-      const step = days <= 7 ? 1 : days <= 30 ? 7 : 10;
+      const step = days <= 7 ? 2 : days <= 30 ? 7 : 10;
       labels.forEach((label, i) => {
-        if (i % step === 0 || i === days - 1) {
+        // 最后一个标签（今天）只在有数据时显示
+        const isLast = i === days - 1;
+        if ((i % step === 0 || isLast) && (!isLast || dataPoints[days - 1] !== null)) {
           const x = padding.left + (i / (days - 1 || 1)) * chartW;
           cvs.fillText(label, x, h - 8);
         }
