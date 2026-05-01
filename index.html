@@ -215,7 +215,7 @@
       </div>
     </div>
 
-    <div class="version">v1.0</div>
+    <div class="version">v2.0 · Firebase</div>
   </div>
 
   <!-- 弹窗们 -->
@@ -330,11 +330,23 @@
 
   <div class="toast" id="toast"></div>
 
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script>
-    // ========== Supabase 配置 ==========
-    const SUPABASE_URL = 'https://dgsnjitkxtffpquweiky.supabase.co';
-    const SUPABASE_KEY = 'sb_publishable_UM9wflLx3aLksX3qdB2wvA_SfJdSeN3';
-    const API = SUPABASE_URL + '/rest/v1';
+    // ========== Firebase 配置 ==========
+    // ⚠️ 请将下方的配置替换为你自己的 Firebase 项目配置！
+    // 获取方式：Firebase Console → 项目设置 → 添加 Web 应用
+    const FIREBASE_CONFIG = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+    firebase.initializeApp(FIREBASE_CONFIG);
+    const DB = firebase.firestore();
 
     const TYPE_MAP = {
       '大便': { icon: '💩', class: 'poop' },
@@ -354,44 +366,77 @@
     let records = [];
     let currentUser = null;
 
-    // ========== Supabase API ==========
-    async function supabaseGet(table, params = '') {
-      const res = await fetch(`${API}/${table}${params}`, {
-        headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` }
-      });
-      if (!res.ok) throw new Error(await res.text());
-      return res.json();
+    // ========== Firestore API ==========
+    // 查找用户 by name（返回数组，保持兼容）
+    async function findUsersByName(name) {
+      const snap = await DB.collection('users').where('name', '==', name).limit(1).get();
+      const arr = [];
+      snap.forEach(doc => arr.push({ id: doc.id, ...doc.data() }));
+      return arr;
     }
 
-    async function supabasePost(table, data) {
-      const res = await fetch(`${API}/${table}`, {
-        method: 'POST',
-        headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
-        body: JSON.stringify(data)
-      });
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.message || err.error?.message || '请求失败');
+    // 创建用户（返回带 id 的数组，保持兼容）
+    async function createUser(data) {
+      const docRef = await DB.collection('users').add(data);
+      const doc = await docRef.get();
+      return [{ id: docRef.id, ...doc.data() }];
+    }
+
+    // 获取用户的所有记录（无 orderBy，客户端排序避免复合索引）
+    async function getRecords(userId) {
+      const snap = await DB.collection('records').where('user_id', '==', userId).get();
+      const arr = [];
+      snap.forEach(doc => arr.push({ _docId: doc.id, ...doc.data() }));
+      return arr;
+    }
+
+    // 添加记录（使用自定义 id 作为文档 ID）
+    async function addRecord(data) {
+      const docId = data.id || Date.now().toString() + Math.random().toString(36).slice(2);
+      const record = { ...data, id: docId };
+      await DB.collection('records').doc(docId).set(record);
+      return record;
+    }
+
+    // 修改记录（用自定义 id 查找文档）
+    async function updateRecord(customId, data) {
+      const snap = await DB.collection('records').where('id', '==', customId).limit(1).get();
+      if (!snap.empty) {
+        await snap.docs[0].ref.update(data);
+      } else {
+        throw new Error('记录不存在');
       }
-      return res.json();
     }
 
-    async function supabaseDelete(table, params) {
-      const res = await fetch(`${API}/${table}${params}`, {
-        method: 'DELETE',
-        headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` }
-      });
-      if (!res.ok) throw new Error(await res.text());
+    // 删除单条记录
+    async function deleteRecordById(customId) {
+      const snap = await DB.collection('records').where('id', '==', customId).limit(1).get();
+      if (!snap.empty) {
+        await snap.docs[0].ref.delete();
+      }
     }
 
-    async function supabaseUpdate(table, data, params) {
-      const res = await fetch(`${API}/${table}${params}`, {
-        method: 'PATCH',
-        headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
-        body: JSON.stringify(data)
-      });
-      if (!res.ok) throw new Error(await res.text());
-      return res.json();
+    // 删除用户所有记录（批量操作）
+    async function deleteAllRecords(userId) {
+      const snap = await DB.collection('records').where('user_id', '==', userId).get();
+      const batch = DB.batch();
+      snap.forEach(doc => batch.delete(doc.ref));
+      await batch.commit();
+    }
+
+    // 更新用户信息
+    async function updateUser(userId, data) {
+      await DB.collection('users').doc(userId).update(data);
+    }
+
+    // ========== Firestore 错误处理 ==========
+    function handleFirestoreError(e) {
+      if (e.code === 'failed-precondition' && e.message.includes('index')) {
+        const match = e.message.match(/https:[^\s]+/);
+        const link = match ? match[0] : 'Firebase Console';
+        return `需要创建索引，请点击链接创建：${link}`;
+      }
+      return e.message;
     }
 
     // ========== 本地存储 ==========
@@ -424,15 +469,15 @@
       if (!name) { err.textContent = '请输入宝宝名字'; return; }
       if (!birthday) { err.textContent = '请选择出生日期'; return; }
       try {
-        const users = await supabaseGet('users', `?name=eq.${encodeURIComponent(name)}&limit=1`);
+        const users = await findUsersByName(name);
         if (users.length > 0) { err.textContent = '这个名字已经被注册了'; return; }
-        const newUser = await supabasePost('users', { name, birthday, gender: regGender });
+        const newUser = await createUser({ name, birthday, gender: regGender });
         const user = newUser[0];
         storeUser(user);
         currentUser = user;
         showApp();
         showToast('✅ 注册成功！');
-      } catch (e) { err.textContent = e.message; }
+      } catch (e) { err.textContent = handleFirestoreError(e); }
     }
 
     async function doLogin() {
@@ -441,14 +486,14 @@
       err.textContent = '';
       if (!name) { err.textContent = '请输入宝宝名字'; return; }
       try {
-        const users = await supabaseGet('users', `?name=eq.${encodeURIComponent(name)}&limit=1`);
+        const users = await findUsersByName(name);
         if (users.length === 0) { err.textContent = '未找到这个名字的用户，请先注册'; return; }
         const user = users[0];
         storeUser(user);
         currentUser = user;
         showApp();
         showToast(`👋 欢迎回来，${user.name}！`);
-      } catch (e) { err.textContent = e.message; }
+      } catch (e) { err.textContent = handleFirestoreError(e); }
     }
 
     function doLogout() {
@@ -513,7 +558,7 @@
     // ========== 数据 ==========
     async function loadRecords() {
       if (!currentUser) return;
-      try { records = await supabaseGet('records', `?user_id=eq.${currentUser.id}&order=time.desc&limit=500`); }
+      try { records = await getRecords(currentUser.id); }
       catch { records = []; }
     }
 
@@ -553,7 +598,7 @@
 
     async function doAddRecord(type, amount, time) {
       if (navigator.vibrate) navigator.vibrate(50);
-      await supabasePost('records', { id: Date.now().toString(), user_id: currentUser.id, type, time, amount });
+      await addRecord({ id: Date.now().toString(), user_id: currentUser.id, type, time, amount });
       await loadRecords();
     }
 
@@ -916,7 +961,7 @@
       const amount = amountVal ? parseFloat(amountVal) : null;
 
       try {
-        await supabaseUpdate('records', { time, amount }, `?id=eq.${pendingEditRecord.id}`);
+        await updateRecord(pendingEditRecord.id, { time, amount });
         await loadRecords();
         await updateStats();
         hideRecordDetailModal();
@@ -929,7 +974,7 @@
       if (!pendingEditRecord) return;
       if (!confirm('确认删除这条记录？')) return;
       try {
-        await supabaseDelete('records', `?id=eq.${pendingEditRecord.id}`);
+        await deleteRecordById(pendingEditRecord.id);
         await loadRecords();
         await updateStats();
         hideRecordDetailModal();
@@ -945,7 +990,7 @@
     function hideClearConfirmModal(e) { if (e && e.target !== e.currentTarget) return; document.getElementById('clearConfirmModal').classList.remove('show'); }
 
     async function confirmClearData() {
-      await supabaseDelete('records', `?user_id=eq.${currentUser.id}`);
+      await deleteAllRecords(currentUser.id);
       records = [];
       hideClearConfirmModal();
       hideMenu();
@@ -974,7 +1019,7 @@
           r.id = r.id || Date.now().toString() + Math.random().toString(36).slice(2);
           r.user_id = currentUser.id;
           delete r.created_at;
-          await supabasePost('records', r);
+          await addRecord(r);
         }
         await loadRecords();
         await updateStats();
@@ -1008,7 +1053,7 @@
       if (!name) { showToast('请输入宝宝名字'); return; }
       if (!birthday) { showToast('请选择出生日期'); return; }
       try {
-        await supabaseUpdate('users', { name, birthday, gender: selectedGender }, `?id=eq.${currentUser.id}`);
+        await updateUser(currentUser.id, { name, birthday, gender: selectedGender });
         currentUser = { ...currentUser, name, birthday, gender: selectedGender };
         storeUser(currentUser);
         hideBabyInfoModal();
