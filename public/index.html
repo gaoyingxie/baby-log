@@ -12,7 +12,7 @@
       --milk: #fdcb6e; --milk-bg: rgba(253,203,110,0.2);
       --breast: #fd79a8; --breast-bg: rgba(253,121,168,0.12);
       --sleep: #a29bfe; --sleep-bg: rgba(162,155,254,0.15);
-      --weight: #fd79a8; --weight-bg: rgba(253,121,168,0.15);
+      --weight: #00b894; --weight-bg: rgba(0,184,148,0.15);
       --text: #2d3436; --text-light: #636e72; --border: #dfe6e9;
       --shadow: 0 2px 12px rgba(0,0,0,0.08); --radius: 20px; --radius-sm: 14px;
     }
@@ -44,7 +44,7 @@
     .record-btn.milk { background: linear-gradient(145deg, var(--milk), #f9a825); color: #5d4e1a; }
     .record-btn.breast { background: linear-gradient(145deg, var(--breast), #e84393); }
     .record-btn.sleep { background: linear-gradient(145deg, var(--sleep), #6c5ce7); }
-    .record-btn.weight { background: linear-gradient(145deg, var(--weight), #e84393); }
+    .record-btn.weight { background: linear-gradient(145deg, var(--weight), #00a884); }
     .stats-row { display: flex; gap: 10px; }
     .stat-item { flex: 1; text-align: center; padding: 14px 8px; border-radius: var(--radius-sm); background: var(--bg); cursor: pointer; }
     .stat-item .icon { font-size: 22px; margin-bottom: 4px; }
@@ -188,7 +188,7 @@
         <div class="stats-row">
           <div class="stat-item poop" onclick="showTodayDetail('大便')"><div class="icon">💩</div><div class="num" id="todayPoop">0</div><div class="label">大便</div></div>
           <div class="stat-item pee" onclick="showTodayDetail('小便')"><div class="icon">💧</div><div class="num" id="todayPee">0</div><div class="label">小便</div></div>
-          <div class="stat-item milk" onclick="showTodayDetail('喂奶')"><div class="icon">🍼🤱</div><div class="num" id="todayFeedCount">0</div><div class="label">喂奶次</div></div>
+          <div class="stat-item milk" onclick="showTodayDetail('喂奶')"><div class="icon">🤱</div><div class="num" id="todayFeedCount">0</div><div class="label">喂奶次</div></div>
           <div class="stat-item" onclick="showTodayDetail('睡眠')" style="flex:1;"><div class="icon">😴</div><div class="num" id="todaySleep" style="color:var(--sleep);">0</div><div class="label">睡眠小时</div></div>
         </div>
       </div>
