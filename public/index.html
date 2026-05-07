@@ -208,6 +208,7 @@
           <button class="filter-btn active" data-chart="milk" onclick="setChartFilter('milk')" id="chartBtnMilk">喝奶量</button>
           <button class="filter-btn" data-chart="maxMilk" onclick="setChartFilter('maxMilk')" id="chartBtnMaxMilk">最大单次</button>
           <button class="filter-btn" data-chart="weight" onclick="setChartFilter('weight')" id="chartBtnWeight">体重</button>
+          <button class="filter-btn" data-chart="sleep" onclick="setChartFilter('sleep')" id="chartBtnSleep">😴 睡眠</button>
         </div>
         <div id="chartContainer" style="height:150px;position:relative;overflow:hidden;"><canvas id="trendChart"></canvas></div>
         <div id="chartSummary"></div>
@@ -852,9 +853,12 @@
         } else if (currentChartFilter === 'maxMilk') {
           const amounts = dayRecords.filter(r => r.type === '喝奶-奶粉' || r.type === '喝奶-母乳').map(r => r.amount || 0);
           dataPoints.push(amounts.length > 0 ? Math.max(...amounts) : null);
-        } else {
+        } else if (currentChartFilter === 'weight') {
           const wr = dayRecords.filter(r => r.type === '体重');
           dataPoints.push(wr.length > 0 ? wr[wr.length - 1].amount : null);
+        } else if (currentChartFilter === 'sleep') {
+          const mins = dayRecords.filter(r => r.type === '睡眠').map(r => r.amount || 0);
+          dataPoints.push(mins.length > 0 ? mins.reduce((s, v) => s + v, 0) / 60 : null);
         }
       }
 
@@ -869,7 +873,7 @@
       }
 
       const maxVal = Math.max(...validValues) * 1.2;
-      const minVal = currentChartFilter === 'weight' ? Math.min(...validValues) * 0.9 : 0;
+      const minVal = currentChartFilter === 'weight' ? Math.min(...validValues) * 0.9 : currentChartFilter === 'sleep' ? 0 : 0;
       const range = maxVal - minVal || 1;
 
       // Y轴标签和网格线
@@ -901,7 +905,7 @@
       });
 
       // 画线
-      const color = currentChartFilter === 'weight' ? '#6c5ce7' : '#fdcb6e';
+      const color = currentChartFilter === 'weight' ? '#6c5ce7' : currentChartFilter === 'sleep' ? '#a29bfe' : '#fdcb6e';
       cvs.beginPath();
       cvs.strokeStyle = color;
       cvs.lineWidth = 2;
@@ -928,7 +932,11 @@
       const total = validValues.reduce((a, b) => a + b, 0);
       if (currentChartFilter === 'milk') document.getElementById('chartSummary').textContent = `累计奶量：${total}ml`;
       else if (currentChartFilter === 'maxMilk') document.getElementById('chartSummary').textContent = `最大单次：${Math.max(...validValues)}ml`;
-      else document.getElementById('chartSummary').textContent = `最新：${validValues[validValues.length-1]}kg`;
+      else if (currentChartFilter === 'weight') document.getElementById('chartSummary').textContent = `最新：${validValues[validValues.length-1]}kg`;
+      else if (currentChartFilter === 'sleep') {
+        const avg = (total / validValues.length).toFixed(1);
+        document.getElementById('chartSummary').textContent = `日均睡眠：${avg}小时`;
+      }
     }
 
     // ========== 今日详情 ==========
