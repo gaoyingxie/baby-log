@@ -11,6 +11,7 @@
       --pee: #74b9ff; --pee-bg: rgba(116,185,255,0.12);
       --milk: #fdcb6e; --milk-bg: rgba(253,203,110,0.2);
       --breast: #fd79a8; --breast-bg: rgba(253,121,168,0.12);
+      --sleep: #a29bfe; --sleep-bg: rgba(162,155,254,0.15);
       --text: #2d3436; --text-light: #636e72; --border: #dfe6e9;
       --shadow: 0 2px 12px rgba(0,0,0,0.08); --radius: 20px; --radius-sm: 14px;
     }
@@ -175,6 +176,9 @@
           <button class="record-btn milk" onclick="record('喂奶')"><span class="icon">🍼</span><span class="label">瓶喂</span></button>
           <button class="record-btn breast" onclick="record('亲喂')"><span class="icon">🤱</span><span class="label">亲喂</span></button>
         </div>
+        <button class="record-btn sleep" onclick="record('睡眠')" style="width:100%;height:56px;margin-top:12px;background:linear-gradient(145deg,var(--sleep),#6c5ce7);color:white;border:none;border-radius:14px;font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+          <span style="font-size:24px;">😴</span><span>睡眠</span>
+        </button>
         <button onclick="record('体重')" style="width:100%;margin-top:12px;height:56px;background:linear-gradient(145deg,#a29bfe,#6c5ce7);color:white;border:none;border-radius:14px;font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
           <span style="font-size:24px;">⚖️</span><span>体重</span>
         </button>
@@ -187,6 +191,15 @@
           <div class="stat-item pee" onclick="showTodayDetail('小便')"><div class="icon">💧</div><div class="num" id="todayPee">0</div><div class="label">小便</div></div>
           <div class="stat-item milk" onclick="showTodayDetail('喝奶')"><div class="icon">🍼</div><div class="num" id="todayMilkAmount">0</div><div class="label">奶量 ml</div></div>
           <div class="stat-item" onclick="showTodayDetail('喂奶')"><div class="icon">🍼🤱</div><div class="num" id="todayFeedCount">0</div><div class="label">喂奶 次</div></div>
+        </div>
+        <div class="stats-row" style="margin-top:10px;">
+          <div class="stat-item sleep" onclick="showTodayDetail('睡眠')" style="flex:1;text-align:center;padding:10px 8px;border-radius:var(--radius-sm);background:var(--bg);cursor:pointer;">
+            <div style="display:flex;align-items:center;justify-content:center;gap:4px;margin-bottom:2px;">
+              <span style="font-size:18px;">😴</span>
+              <span class="num" id="todaySleep" style="font-size:24px;font-weight:700;color:var(--sleep);">0</span>
+            </div>
+            <div style="font-size:11px;color:var(--text-light);">睡眠 小时</div>
+          </div>
         </div>
       </div>
     </div>
@@ -215,7 +228,7 @@
       </div>
     </div>
 
-    <div class="version">v3.3 · 一键云更新 🚀</div>
+    <div class="version">v4.0 · 😴 睡眠统计 🎉</div>
   </div>
 
   <!-- 弹窗们 -->
@@ -258,6 +271,17 @@
       <div class="form-group"><label>体重（kg）</label><input type="number" id="weightAmount" step="0.01" placeholder="例如：6.55"></div>
       <button class="modal-btn export" onclick="confirmWeight()">确认记录</button>
       <button class="modal-btn cancel" onclick="hideWeightModal()">取消</button>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="sleepModal" onclick="hideSleepModal(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-title">😴 记录睡眠</div>
+      <div class="form-group"><label>入睡时间</label><input type="datetime-local" id="sleepStartTime"></div>
+      <div class="form-group"><label>醒来时间</label><input type="datetime-local" id="sleepEndTime"></div>
+      <div style="text-align:center;font-size:16px;color:var(--sleep);font-weight:600;margin-bottom:12px;" id="sleepDuration">—</div>
+      <button class="modal-btn export" onclick="confirmSleep()" style="background:linear-gradient(145deg,var(--sleep),#6c5ce7);">确认记录</button>
+      <button class="modal-btn cancel" onclick="hideSleepModal()">取消</button>
     </div>
   </div>
 
@@ -305,6 +329,10 @@
           <label id="recordDetailAmountLabel">数值</label>
           <input type="number" id="recordDetailAmount" step="0.01">
         </div>
+        <div class="form-group" id="recordDetailEndTimeGroup" style="display:none;">
+          <label>结束时间</label>
+          <input type="datetime-local" id="recordDetailEndTime">
+        </div>
       </div>
       <button class="modal-btn export" id="recordDetailSaveBtn" onclick="saveRecordEdit()" style="display:none;">保存修改</button>
       <button class="modal-btn cancel" id="recordDetailDeleteBtn" onclick="deleteRecord()" style="background:#e74c3c;color:white;display:none;">删除此记录</button>
@@ -342,7 +370,8 @@
       '喝奶-奶粉': { icon: '🍼', class: 'milk' },
       '喝奶-母乳': { icon: '🍼', class: 'milk' },
       '亲喂': { icon: '🤱', class: 'breast' },
-      '体重': { icon: '⚖️', class: 'weight' }
+      '体重': { icon: '⚖️', class: 'weight' },
+      '睡眠': { icon: '😴', class: 'sleep' }
     };
 
     let currentFilter = 'week';
@@ -512,6 +541,10 @@
       const d = new Date(iso);
       return `${d.getMonth()+1}月${d.getDate()}日 ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
     }
+    function formatShortTime(iso) {
+      const d = new Date(iso);
+      return `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
+    }
     function getRelativeTime(iso) {
       const now = new Date(); const diffMin = Math.floor((now - new Date(iso)) / 60000);
       if (diffMin < 1) return '刚刚';
@@ -539,7 +572,9 @@
     async function updateStats() {
       if (records.length === 0) await loadRecords();
       const todayStart = getStartOfDay(new Date());
-      let poo = 0, pee = 0, milkAmt = 0, feedCnt = 0;
+      const todayEnd = new Date(todayStart);
+      todayEnd.setDate(todayEnd.getDate() + 1);
+      let poo = 0, pee = 0, milkAmt = 0, feedCnt = 0, sleepMin = 0;
       records.forEach(r => {
         const t = new Date(r.time);
         if (t >= todayStart) {
@@ -548,11 +583,18 @@
           else if (r.type === '亲喂') feedCnt++;
           else if (r.type === '喝奶-奶粉' || r.type === '喝奶-母乳') { milkAmt += (r.amount || 0); feedCnt++; }
         }
+        // 睡眠：入睡或醒来在今天内都算
+        if (r.type === '睡眠') {
+          const e = r.end_time ? new Date(r.end_time) : null;
+          const isToday = (t >= todayStart && t < todayEnd) || (e && e >= todayStart && e < todayEnd);
+          if (isToday) sleepMin += (r.amount || 0);
+        }
       });
       document.getElementById('todayPoop').textContent = poo;
       document.getElementById('todayPee').textContent = pee;
       document.getElementById('todayMilkAmount').textContent = milkAmt;
       document.getElementById('todayFeedCount').textContent = feedCnt;
+      document.getElementById('todaySleep').textContent = (sleepMin / 60).toFixed(1);
     }
 
     function updateBabyHeader() {
@@ -568,6 +610,7 @@
       if (type === '亲喂') { showBreastFeedModal(); return; }
       if (type === '体重') { showWeightModal(); return; }
       if (type === '喂奶') { showFeedMilkModal(); return; }
+      if (type === '睡眠') { showSleepModal(); return; }
     }
 
     async function doAddRecord(type, amount, time) {
@@ -673,6 +716,50 @@
       showToast(`⚖️ 体重 ${amount}kg 已记录`);
     }
 
+    // ========== 睡眠 ==========
+    function showSleepModal() {
+      const now = new Date();
+      // 默认入睡时间 = 2小时前，醒来时间 = now
+      const end = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+      const start = new Date(now.getTime() - now.getTimezoneOffset() * 60000 - 2 * 3600000).toISOString().slice(0, 16);
+      document.getElementById('sleepStartTime').value = start;
+      document.getElementById('sleepEndTime').value = end;
+      document.getElementById('sleepDuration').textContent = '—';
+      document.getElementById('sleepModal').classList.add('show');
+      // 实时计算时长
+      document.getElementById('sleepStartTime').onchange = updateSleepDurationDisplay;
+      document.getElementById('sleepEndTime').onchange = updateSleepDurationDisplay;
+    }
+
+    function updateSleepDurationDisplay() {
+      const s = document.getElementById('sleepStartTime').value;
+      const e = document.getElementById('sleepEndTime').value;
+      if (!s || !e) { document.getElementById('sleepDuration').textContent = '—'; return; }
+      const diffMin = (new Date(e) - new Date(s)) / 60000;
+      if (diffMin <= 0) { document.getElementById('sleepDuration').textContent = '⚠️ 结束时间需晚于开始时间'; return; }
+      const h = Math.floor(diffMin / 60);
+      const m = Math.round(diffMin % 60);
+      document.getElementById('sleepDuration').textContent = `😴 ${h}小时${m > 0 ? m + '分钟' : ''}`;
+    }
+
+    function hideSleepModal(e) { if (e && e.target !== e.currentTarget) return; document.getElementById('sleepModal').classList.remove('show'); }
+
+    async function confirmSleep() {
+      const s = document.getElementById('sleepStartTime').value;
+      const e = document.getElementById('sleepEndTime').value;
+      if (!s || !e) { showToast('请选择入睡和醒来时间'); return; }
+      const diffMin = (new Date(e) - new Date(s)) / 60000;
+      if (diffMin <= 0) { showToast('结束时间需晚于开始时间'); return; }
+      hideSleepModal();
+      const startTime = new Date(s).toISOString();
+      await addRecord({ id: Date.now().toString(), user_id: currentUser.id, type: '睡眠', time: startTime, end_time: new Date(e).toISOString(), amount: Math.round(diffMin) });
+      await loadRecords();
+      await updateStats();
+      const h = Math.floor(diffMin / 60);
+      const m = Math.round(diffMin % 60);
+      showToast(`😴 已记录 ${h}小时${m > 0 ? m + '分钟' : ''}`);
+    }
+
     // ========== 历史 ==========
     function switchTab(tabId) {
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tabId));
@@ -704,9 +791,16 @@
       if (sorted.length === 0) { list.innerHTML = '<div class="history-empty">暂无记录</div>'; return; }
       list.innerHTML = sorted.map(r => {
         const map = TYPE_MAP[r.type] || TYPE_MAP['大便'];
-        const extra = r.type === '体重' ? ` ${r.amount}kg` : (r.amount ? ` ${r.amount}ml` : '');
+        let extra = r.type === '体重' ? ` ${r.amount}kg` : (r.amount ? ` ${r.amount}ml` : '');
+        let timeDisplay = formatFull(r.time);
+        if (r.type === '睡眠' && r.end_time) {
+          const h = Math.floor((r.amount || 0) / 60);
+          const m = Math.round((r.amount || 0) % 60);
+          extra = ` ${h}小时${m > 0 ? m + '分钟' : ''}`;
+          timeDisplay = `${formatShortTime(r.time)}→${formatShortTime(r.end_time)}`;
+        }
         return `<div class="history-item ${map.class}" onclick="showRecordDetail('${r.id}')" style="cursor:pointer;">
-          <div class="time">${formatFull(r.time)}</div>
+          <div class="time">${timeDisplay}</div>
           <div class="type-icon">${map.icon}</div>
           <div class="info">
             <div class="type-name ${map.class}">${r.type}${extra}</div>
@@ -856,21 +950,29 @@
         if (type === '大便') return r.type === '大便';
         if (type === '小便') return r.type === '小便';
         if (type === '喝奶' || type === '喂奶') return r.type === '喝奶-奶粉' || r.type === '喝奶-母乳' || r.type === '亲喂';
+        if (type === '睡眠') return r.type === '睡眠';
         return false;
       }).sort((a, b) => new Date(b.time) - new Date(a.time));
 
-      document.getElementById('todayDetailTitle').textContent = type === '大便' ? '💩 今日大便' : type === '小便' ? '💧 今日小便' : '🍼 今日喂奶';
+      document.getElementById('todayDetailTitle').textContent = type === '大便' ? '💩 今日大便' : type === '小便' ? '💧 今日小便' : type === '睡眠' ? '😴 今日睡眠' : '🍼 今日喂奶';
       const list = document.getElementById('todayDetailList');
       if (todayRecords.length === 0) {
         list.innerHTML = '<div style="text-align:center;color:var(--text-light);padding:20px;">暂无记录</div>';
       } else {
         list.innerHTML = todayRecords.map(r => {
           const map = TYPE_MAP[r.type] || TYPE_MAP['大便'];
-          const extra = r.type === '体重' ? ` ${r.amount}kg` : (r.amount ? ` ${r.amount}ml` : '');
+          let extra = r.type === '体重' ? ` ${r.amount}kg` : (r.amount ? ` ${r.amount}ml` : '');
+          let timeDisplay = formatFull(r.time);
+          if (r.type === '睡眠' && r.end_time) {
+            const h = Math.floor((r.amount || 0) / 60);
+            const m = Math.round((r.amount || 0) % 60);
+            extra = ` ${h}小时${m > 0 ? m + '分钟' : ''}`;
+            timeDisplay = `${formatShortTime(r.time)}→${formatShortTime(r.end_time)}`;
+          }
           return `<div style="display:flex;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);">
             <span style="font-size:22px;margin-right:10px;">${map.icon}</span>
             <span style="flex:1;font-size:14px;">${r.type}${extra}</span>
-            <span style="font-size:12px;color:var(--text-light);">${formatFull(r.time)}</span>
+            <span style="font-size:12px;color:var(--text-light);">${timeDisplay}</span>
           </div>`;
         }).join('');
       }
@@ -890,7 +992,6 @@
 
       document.getElementById('recordDetailTitle').textContent = map.icon + ' ' + r.type;
       document.getElementById('recordDetailType').textContent = map.icon;
-      document.getElementById('recordDetailInfo').textContent = formatFull(r.time);
 
       const timeInput = document.getElementById('recordDetailTime');
       const dt = new Date(r.time);
@@ -900,16 +1001,35 @@
       const amountInput = document.getElementById('recordDetailAmount');
       const amountLabel = document.getElementById('recordDetailAmountLabel');
 
-      if (r.type === '体重') {
+      // 睡眠记录特殊处理
+      if (r.type === '睡眠') {
+        document.getElementById('recordDetailInfo').textContent = '时长：' + (r.amount ? Math.floor(r.amount/60) + '小时' + (r.amount%60 > 0 ? r.amount%60 + '分钟' : '') : '—');
         amountGroup.style.display = 'block';
-        amountLabel.textContent = '体重（kg）';
+        amountLabel.textContent = '时长（分钟）';
         amountInput.value = r.amount || '';
-      } else if (r.type === '喝奶-奶粉' || r.type === '喝奶-母乳') {
-        amountGroup.style.display = 'block';
-        amountLabel.textContent = '奶量（ml）';
-        amountInput.value = r.amount || '';
+        // 显示结束时间输入
+        const endTimeGroup = document.getElementById('recordDetailEndTimeGroup');
+        if (endTimeGroup) endTimeGroup.style.display = 'block';
+        const endTimeInput = document.getElementById('recordDetailEndTime');
+        if (endTimeInput && r.end_time) {
+          const edt = new Date(r.end_time);
+          endTimeInput.value = new Date(edt.getTime() - edt.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+        }
       } else {
-        amountGroup.style.display = 'none';
+        document.getElementById('recordDetailInfo').textContent = formatFull(r.time);
+        if (r.type === '体重') {
+          amountGroup.style.display = 'block';
+          amountLabel.textContent = '体重（kg）';
+          amountInput.value = r.amount || '';
+        } else if (r.type === '喝奶-奶粉' || r.type === '喝奶-母乳') {
+          amountGroup.style.display = 'block';
+          amountLabel.textContent = '奶量（ml）';
+          amountInput.value = r.amount || '';
+        } else {
+          amountGroup.style.display = 'none';
+        }
+        const endTimeGroup = document.getElementById('recordDetailEndTimeGroup');
+        if (endTimeGroup) endTimeGroup.style.display = 'none';
       }
 
       document.getElementById('recordDetailEdit').style.display = 'block';
@@ -928,14 +1048,19 @@
       if (!pendingEditRecord) return;
       const timeVal = document.getElementById('recordDetailTime').value;
       const amountVal = document.getElementById('recordDetailAmount').value;
+      const endTimeVal = document.getElementById('recordDetailEndTime').value;
 
       if (!timeVal) { showToast('请选择时间'); return; }
 
       const time = new Date(timeVal).toISOString();
       const amount = amountVal ? parseFloat(amountVal) : null;
+      const updateData = { time, amount };
+      if (pendingEditRecord.type === '睡眠' && endTimeVal) {
+        updateData.end_time = new Date(endTimeVal).toISOString();
+      }
 
       try {
-        await updateRecord(pendingEditRecord.id, { time, amount });
+        await updateRecord(pendingEditRecord.id, updateData);
         await loadRecords();
         await updateStats();
         hideRecordDetailModal();

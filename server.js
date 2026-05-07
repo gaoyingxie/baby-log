@@ -227,7 +227,7 @@ async function handleApi(req, res, pathname, query) {
     if (pathname === '/api/records' && req.method === 'POST') {
       const body = await parseBody(req);
       if (!body.id || !body.user_id || !body.type) return jsonResponse(res, 400, { error: '缺少必要字段' });
-      db.records.push({ id: body.id, user_id: body.user_id, type: body.type, time: body.time || new Date().toISOString(), amount: body.amount || null, created_at: new Date().toISOString() });
+      db.records.push({ id: body.id, user_id: body.user_id, type: body.type, time: body.time || new Date().toISOString(), end_time: body.end_time || null, amount: body.amount || null, created_at: new Date().toISOString() });
       saveDb();
       return jsonResponse(res, 201, { success: true });
     }
@@ -238,8 +238,8 @@ async function handleApi(req, res, pathname, query) {
       if (!Array.isArray(body)) return jsonResponse(res, 400, { error: '需要数组' });
       for (const r of body) {
         const idx = db.records.findIndex(x => x.id === r.id);
-        if (idx >= 0) db.records[idx] = { ...r, amount: r.amount || null };
-        else db.records.push({ ...r, amount: r.amount || null });
+        if (idx >= 0) db.records[idx] = { ...r, amount: r.amount || null, end_time: r.end_time || null };
+        else db.records.push({ ...r, amount: r.amount || null, end_time: r.end_time || null });
       }
       saveDb();
       return jsonResponse(res, 200, { success: true, count: body.length });
@@ -253,6 +253,7 @@ async function handleApi(req, res, pathname, query) {
       if (idx < 0) return jsonResponse(res, 404, { error: '记录不存在' });
       if (body.time !== undefined) db.records[idx].time = body.time;
       if (body.amount !== undefined) db.records[idx].amount = body.amount;
+      if (body.end_time !== undefined) db.records[idx].end_time = body.end_time;
       saveDb();
       return jsonResponse(res, 200, { success: true });
     }
